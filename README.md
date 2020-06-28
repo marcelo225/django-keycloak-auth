@@ -1,6 +1,15 @@
-============================================
-Django Keycloak Auth
+# Django Keycloak Auth
 
+- [Django Keycloak Auth](#django-keycloak-auth)
+  - [What is it?](#what-is-it)
+  - [Installation](#installation)
+    - [Via Pypi Package:](#via-pypi-package)
+    - [Manually](#manually)
+  - [Dependencies](#dependencies)
+  - [How to contribute](#how-to-contribute)
+  - [Licence](#licence)
+  - [Credits](#credits)
+  - [Usage](#usage)
 - [How to use](#how-to-use)
   - [ModelViewSet](#modelviewset)
   - [ViewSet](#viewset)
