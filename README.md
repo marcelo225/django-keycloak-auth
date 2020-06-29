@@ -1,25 +1,12 @@
 # Django Keycloak Auth
 
-- [Django Keycloak Auth](#django-keycloak-auth)
-  - [What is it?](#what-is-it)
-  - [Installation](#installation)
-    - [Via Pypi Package:](#via-pypi-package)
-    - [Manually](#manually)
-  - [Dependencies](#dependencies)
-  - [How to contribute](#how-to-contribute)
-  - [Licence](#licence)
-  - [Credits](#credits)
-  - [Usage](#usage)
-- [How to use](#how-to-use)
-  - [ModelViewSet](#modelviewset)
-  - [ViewSet](#viewset)
-  - [Install this package to Pypi](#install-this-package-to-pypi)
-
 ## What is it?
 
 Django Keycloak Auth is a simple library that authorizes your application's resources using Django Rest Framework.
 
 For review see https://github.com/marcelo225/django-keycloak-auth
+
+Package link: https://pypi.org/project/django-keycloak-auth/
 
 ## Installation
 
@@ -34,9 +21,14 @@ For review see https://github.com/marcelo225/django-keycloak-auth
 ## Dependencies
 
 * [Python 3](https://www.python.org/)
-* [Django Rest Framework](https://www.django-rest-framework.org/)
 * [requests](https://requests.readthedocs.io/en/master/)
 * [python-jose](https://python-jose.readthedocs.io/en/latest/)
+* [Django](https://www.djangoproject.com/)
+* [Django Rest Framework](https://www.django-rest-framework.org/)
+
+## Test dependences
+
+* [unittest](https://docs.python.org/3/library/unittest.html)
 
 ## How to contribute
 
@@ -147,13 +139,22 @@ class CarViewSet(viewsets.ViewSet):
 
 ## Install this package to Pypi
 
-For developers
+If you interested contribute to developing this project, it was prepared a tiny tutorial to install the environment before you begin:
 
 ```bash
-# Generate distribuition
+# Install venv
+$ python3 -m venv env && source env/bin/activate
+
+# Update packages
+$ python -m pip install --upgrade pip Django djangorestframework requests python-jose twine setuptools wheel
+
+# Generate distribuition -> it's on me for while ;)
 $ python setup.py sdist
 
-# Upload package
+# Checks if the package has no errors
+$ twine check dist/*
+
+# Upload package -> it's on me for while ;)
 $ twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
 
 ```

@@ -1,3 +1,5 @@
 Django
-djangorestframework
-python-jose
+djangorestframework>=3.10.0
+python-jose==3.1.0
+requests==2.24.0
+twine==1.15.0
