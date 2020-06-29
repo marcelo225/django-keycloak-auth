@@ -71,6 +71,7 @@ MIDDLEWARE = [
 KEYCLOAK_EXEMPT_URIS = []
 
 # Realm public key
+# Used to encode or decode token
 KEYCLOAK_REALM_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -84,7 +85,7 @@ xxxxxxxxxxxxxx
 KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth/',
     'KEYCLOAK_REALM': 'TESTE',
-    'KEYCLOAK_REALM_PUBLIC_KEY': KEYCLOAK_REALM_PUBLIC_KEY,    
+    'KEYCLOAK_REALM_PUBLIC_KEY': KEYCLOAK_REALM_PUBLIC_KEY,
     'KEYCLOAK_REAM_ALGORITHM': 'RS256',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
     'KEYCLOAK_CLIENT_SECRET_KEY': ''    
@@ -100,14 +101,17 @@ This is an example how to apply on your Views
 
 ```python
 
-from rest_framework import viewsets
+from rest_framework import viewsets, views
 from . import models, serializers
 from rest_framework import status
 from django.http.response import JsonResponse
 from rest_framework.exceptions import PermissionDenied
 
 class BankViewSet(viewsets.ModelViewSet):
-
+    """
+    Bank endpoint    
+    This endpoint has all configured keycloak roles    
+    """
     serializer_class = serializers.BankSerializer
     queryset = models.Bank.objects.all()    
     keycloak_roles = {
@@ -126,8 +130,8 @@ class BankViewSet(viewsets.ModelViewSet):
         list of roles that came from authenticated token.
         See the following example bellow:
         """
-        if request.roles == 'director':
-            return JsonResponse({"detail": PermissionDenied.default_detail}, status=PermissionDenied.status_code)    
+        # list of token roles
+        print(request.roles)        
         return super().list(self, request)
 ```
 
@@ -136,14 +140,45 @@ class BankViewSet(viewsets.ModelViewSet):
 ```python
 
 class CarViewSet(viewsets.ViewSet):
-    keycloak_roles = {
-        'GET': ['director', 'judge', 'employee'],
-    }
-    
+    """
+    Car endpoint
+    This endpoint has not configured keycloak roles. 
+    That means all methods will be allowed to access.
+    """    
     def list(self, request):
-        return JsonResponse({"detail": PermissionDenied.default_detail}, status=PermissionDenied.status_code)
+        return JsonResponse({"detail": "success"}, status=status.HTTP_200_OK)        
 
 ```
+
+## APIView
+
+```python
+
+class JudgementView(views.APIView):
+    """
+    Judgement endpoint
+    This endpoint has configured keycloak roles only GET method.
+    Other HTTP methods will be allowed.
+    """
+    keycloak_roles = {
+        'GET': ['judge'],
+    }
+    
+    def get(self, request, format=None):
+        """
+        Overwrite method
+        You can especify your rules inside each method 
+        using the variable 'request.roles' that means a
+        list of roles that came from authenticated token.
+        See the following example bellow:
+        """
+        # list of token roles
+        print(request.roles)
+        return super().get(self, request)    
+
+```
+
+When you don't put **keycloak_roles** attribute in the Views that means all methods authorizations will be allowed.
 
 ## Install this package to Pypi
 

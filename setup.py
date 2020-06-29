@@ -6,7 +6,6 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-print(find_packages())
 setup(
     name="django-keycloak-auth",
     version="0.4",
