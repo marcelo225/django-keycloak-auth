@@ -17,7 +17,7 @@ class KeycloakMiddlewareTestCase(TestCase):
 
     def tearDown(self):
         settings.KEYCLOAK_EXEMPT_URIS = []
-        settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'https://sso.apps.tjdft.jus.br/auth/'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'https://localhost:8080/auth/'
     
     def test_when_has_not_some_keycloak_configuration_settings(self):
         
