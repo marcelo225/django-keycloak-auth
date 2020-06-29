@@ -4,6 +4,8 @@
 
 Django Keycloak Auth is a simple library that authorizes your application's resources using Django Rest Framework.
 
+This package is used to perform authorization by keycloak roles.
+
 For review see https://github.com/marcelo225/django-keycloak-auth
 
 Package link: https://pypi.org/project/django-keycloak-auth/
@@ -98,6 +100,12 @@ This is an example how to apply on your Views
 
 ```python
 
+from rest_framework import viewsets
+from . import models, serializers
+from rest_framework import status
+from django.http.response import JsonResponse
+from rest_framework.exceptions import PermissionDenied
+
 class BankViewSet(viewsets.ModelViewSet):
 
     serializer_class = serializers.BankSerializer
@@ -133,7 +141,7 @@ class CarViewSet(viewsets.ViewSet):
     }
     
     def list(self, request):
-        return JsonResponse({"detail": "success"}, status=status.HTTP_200_OK)
+        return JsonResponse({"detail": PermissionDenied.default_detail}, status=PermissionDenied.status_code)
 
 ```
 
