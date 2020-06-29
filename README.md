@@ -60,7 +60,7 @@ Lead Developer - Marcelo Vinicius
 ```python
 MIDDLEWARE = [
     #...
-    'keycloak-auth.middleware.KeycloakMiddleware',
+    'django-keycloak-auth.middleware.KeycloakMiddleware',
     #...
 ]
 
@@ -185,7 +185,7 @@ When you don't put **keycloak_roles** attribute in the Views that means all meth
 If you interested contribute to developing this project, it was prepared a tiny tutorial to install the environment before you begin:
 
 ```bash
-# Install venv
+# Install venv in root project folder
 $ python3 -m venv env && source env/bin/activate
 
 # Update packages
