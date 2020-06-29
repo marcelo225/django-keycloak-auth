@@ -22,4 +22,5 @@ from core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('core/', include(core_route.urls)),
+    path('judgements/', views.JudgementView.as_view()),
 ]
