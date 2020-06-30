@@ -50,12 +50,9 @@ class KeycloakConnect:
         self.client_secret_key = client_secret_key
 
         # Keycloak useful Urls
-        self.well_known_endpoint = self.server_url + "realms/" + self.realm_name + "/.well-known/openid-configuration"
-        self.authorization_endpoint = self.server_url + "realms/" + self.realm_name + "/protocol/openid-connect/auth"
-        self.token_endpoint = self.server_url + "realms/" + self.realm_name + "/protocol/openid-connect/token"
-        self.token_introspection_endpoint = self.server_url + "realms/" + self.realm_name + "/protocol/openid-connect/token/introspect"
-        self.userinfo_endpoint = self.server_url + "realms/" + self.realm_name + "/protocol/openid-connect/userinfo"
-        self.end_session_endpoint = self.server_url + "realms/" + self.realm_name + "/protocol/openid-connect/logout"
+        self.well_known_endpoint = self.server_url + "/realms/" + self.realm_name + "/.well-known/openid-configuration"
+        self.token_introspection_endpoint = self.server_url + "/realms/" + self.realm_name + "/protocol/openid-connect/token/introspect"
+        self.userinfo_endpoint = self.server_url + "/realms/" + self.realm_name + "/protocol/openid-connect/userinfo"
 
     def well_known(self):
         """Lists endpoints and other configuration options 

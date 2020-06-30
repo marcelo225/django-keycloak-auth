@@ -87,7 +87,7 @@ MIDDLEWARE = [
 # For example: ['core/banks', 'swagger']
 KEYCLOAK_EXEMPT_URIS = []
 KEYCLOAK_CONFIG = {
-    'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth/',
+    'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
     'KEYCLOAK_REALM': 'TESTE',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
     'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'

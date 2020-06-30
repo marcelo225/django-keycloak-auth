@@ -24,6 +24,7 @@ from django.conf import settings
 from django.http.response import JsonResponse
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, NotAuthenticated
 
+
 class KeycloakMiddleware:
 
     def __init__(self, get_response):
@@ -42,6 +43,18 @@ class KeycloakMiddleware:
             self.client_secret_key = self.config['KEYCLOAK_CLIENT_SECRET_KEY']            
         except KeyError as e:
             raise Exception("The mandatory KEYCLOAK configuration variables has not defined.")
+
+        if self.config['KEYCLOAK_SERVER_URL'] is None:
+            raise Exception("The mandatory KEYCLOAK_SERVER_URL configuration variables has not defined.")
+            
+        if self.config['KEYCLOAK_REALM'] is None:
+            raise Exception("The mandatory KEYCLOAK_REALM configuration variables has not defined.")
+            
+        if self.config['KEYCLOAK_CLIENT_ID'] is None:
+            raise Exception("The mandatory KEYCLOAK_CLIENT_ID configuration variables has not defined.")
+            
+        if self.config['KEYCLOAK_CLIENT_SECRET_KEY'] is None:
+            raise Exception("The mandatory KEYCLOAK_CLIENT_SECRET_KEY configuration variables has not defined.")
 
         # Create Keycloak instance
         self.keycloak = KeycloakConnect(server_url=self.server_url,

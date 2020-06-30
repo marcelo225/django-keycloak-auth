@@ -17,7 +17,10 @@ class KeycloakMiddlewareTestCase(TestCase):
 
     def tearDown(self):
         settings.KEYCLOAK_EXEMPT_URIS = []
-        settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'https://localhost:8080/auth/'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'https://localhost:8080/auth'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'] = 'REALM'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'] = 'client-backend'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_SECRET_KEY'] = '41ab4e22-a6f3-4bef-86e3-f2a1c97d6387'
     
     def test_when_has_not_some_keycloak_configuration_settings(self):
         
@@ -28,7 +31,51 @@ class KeycloakMiddlewareTestCase(TestCase):
         # THEN throws configuration exception
         with self.assertRaises(Exception):
             response = self.client.get(self.uri)
-            KeycloakMiddleware(HttpResponse)(self.request)
+            KeycloakMiddleware(Mock)(self.request)
+    
+    def test_when_has_not_keycloak_server_url_configuration_settings(self):
+        
+        # GIVEN None value KEYCLOAK_SERVER_URL django settings
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = None
+
+        # WHEN makes a request
+        # THEN throws configuration exception
+        with self.assertRaises(Exception):
+            response = self.client.get(self.uri)
+            KeycloakMiddleware(Mock)(self.request)
+
+    def test_when_has_not_keycloak_realm_configuration_settings(self):
+        
+        # GIVEN None value KEYCLOAK_REALM django settings
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'] = None
+
+        # WHEN makes a request
+        # THEN throws configuration exception
+        with self.assertRaises(Exception):
+            response = self.client.get(self.uri)
+            KeycloakMiddleware(Mock)(self.request)
+    
+    def test_when_has_not_keycloak_client_secret_key_configuration_settings(self):
+        
+        # GIVEN None value KEYCLOAK_CLIENT_SECRET_KEY django settings
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_SECRET_KEY'] = None
+
+        # WHEN makes a request
+        # THEN throws configuration exception
+        with self.assertRaises(Exception):
+            response = self.client.get(self.uri)
+            KeycloakMiddleware(Mock)(self.request)
+    
+    def test_when_has_not_keycloak_client_id_configuration_settings(self):
+        
+        # GIVEN None value KEYCLOAK_CLIENT_ID django settings
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'] = None
+
+        # WHEN makes a request
+        # THEN throws configuration exception
+        with self.assertRaises(Exception):
+            response = self.client.get(self.uri)
+            KeycloakMiddleware(Mock)(self.request)
     
     def test_when_some_URI_is_permitted_on_authentication_with_keycloak_roles_on_view(self):
         
