@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import requests
-from jose import jwt
 from django.http.response import JsonResponse
 
 
