@@ -24,7 +24,7 @@ from django.http.response import JsonResponse
 
 class KeycloakConnect:
     
-    def __init__(self, server_url, realm_name, client_id, realm_public_key=None, client_secret_key=None, realm_algorithm='RS256'):
+    def __init__(self, server_url, realm_name, client_id, client_secret_key=None):
         """Create Keycloak Instance.
 
         Args:
@@ -34,24 +34,12 @@ class KeycloakConnect:
                 Realm name
             client_id (str): 
                 Client ID
-            realm_public_key (str, optional): 
-                Realm public key. 
-                You can get it in in menu: REALMS > 'Key' tab. 
-                - encode/decode token -> Mandatory
-                - introspect token -> Not use
-                
             client_secret_key (str, optional): 
                 Client secret credencials.
                 For each 'access type':
                     - bearer-only -> Optional
                     - public -> Mandatory
                     - confidencial -> Mandatory
-
-            realm_algorithm (str, optional): 
-                Algorithm used to encript/deecript token. 
-                - encode/decode token -> Mandatory
-                - introspect token -> Not use
-                Defaults to 'RS256'.
         
         Returns:
             object: Keycloak object
@@ -61,8 +49,6 @@ class KeycloakConnect:
         self.realm_name = realm_name
         self.client_id = client_id
         self.client_secret_key = client_secret_key
-        self.realm_public_key = realm_public_key
-        self.realm_algorithm = realm_algorithm
 
         # Keycloak useful Urls
         self.well_known_endpoint = self.server_url + "realms/" + self.realm_name + "/.well-known/openid-configuration"
@@ -145,15 +131,11 @@ class KeycloakConnect:
         Returns:
             list: List of roles.
         """
-        token_decoded = self.introspect(token)
-        resource_access = token_decoded['resource_access'].get(self.client_id, None)
+        token_decoded = self.introspect(token)        
+        if not self.client_id in token_decoded['resource_access']:
+            return None
+        resource_access = token_decoded['resource_access'].get(self.client_id, None)        
         return resource_access.get('roles', None)
-
-    def encode_token(self, string):
-        return jwt.encode(string, self.realm_public_key, algorithm=self.realm_algorithm)
-
-    def decode_token(self, token):
-        return jwt.decode(token, self.realm_public_key, algorithms=[self.realm_algorithm])
 
     def userinfo(self, token):
         """Get user info from authenticated token
@@ -170,20 +152,3 @@ class KeycloakConnect:
         response = requests.request("GET", self.userinfo_endpoint, headers=headers)
         return response.json()
 
-    def authorization(self):
-        """
-        Not implementated
-        """
-        pass
-    
-    def login(self):
-        """
-        Not implementated
-        """
-        pass
-
-    def logout(self):
-        """
-        Not implementated
-        """
-        pass    

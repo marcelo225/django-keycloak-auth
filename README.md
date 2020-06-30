@@ -1,5 +1,23 @@
 # Django Keycloak Auth
 
+- [Django Keycloak Auth](#django-keycloak-auth)
+  - [What is it?](#what-is-it)
+  - [Installation](#installation)
+    - [Via Pypi Package:](#via-pypi-package)
+    - [Manually](#manually)
+  - [Dependencies](#dependencies)
+  - [Test dependences](#test-dependences)
+  - [How to contribute](#how-to-contribute)
+  - [Licence](#licence)
+  - [Credits](#credits)
+  - [Usage](#usage)
+- [How to use](#how-to-use)
+  - [ModelViewSet](#modelviewset)
+  - [ViewSet](#viewset)
+  - [APIView](#apiview)
+  - [Install this package to Pypi](#install-this-package-to-pypi)
+  - [Install keycloak](#install-keycloak)
+
 ## What is it?
 
 Django Keycloak Auth is a simple library that authorizes your application's resources using Django Rest Framework.
@@ -24,7 +42,6 @@ Package link: https://pypi.org/project/django-keycloak-auth/
 
 * [Python 3](https://www.python.org/)
 * [requests](https://requests.readthedocs.io/en/master/)
-* [python-jose](https://python-jose.readthedocs.io/en/latest/)
 * [Django](https://www.djangoproject.com/)
 * [Django Rest Framework](https://www.django-rest-framework.org/)
 
@@ -69,26 +86,11 @@ MIDDLEWARE = [
 # Exempt URIS 
 # For example: ['core/banks', 'swagger']
 KEYCLOAK_EXEMPT_URIS = []
-
-# Realm public key
-# Used to encode or decode token
-KEYCLOAK_REALM_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxx
------END PUBLIC KEY-----"""
-
 KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth/',
     'KEYCLOAK_REALM': 'TESTE',
-    'KEYCLOAK_REALM_PUBLIC_KEY': KEYCLOAK_REALM_PUBLIC_KEY,
-    'KEYCLOAK_REAM_ALGORITHM': 'RS256',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
-    'KEYCLOAK_CLIENT_SECRET_KEY': ''    
+    'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
 }
 
 ```
@@ -201,3 +203,16 @@ $ twine check dist/*
 $ twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
 
 ```
+
+## Install keycloak
+
+If you wanna run keycloak docker container:
+
+1. Run following command on terminal:
+
+```bash
+# in root project folder
+$ docker-compose up
+```
+
+2. type http:localhost:8080/ in your web browser 
