@@ -145,23 +145,9 @@ STATIC_URL = '/static/'
 
 # For example: ['core/banks', 'swagger']
 KEYCLOAK_EXEMPT_URIS = []
-
-# Realm public key
-KEYCLOAK_REALM_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxx
------END PUBLIC KEY-----"""
-
 KEYCLOAK_CONFIG = {
-    'KEYCLOAK_SERVER_URL': 'https://localhost:8080/auth/',
+    'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
     'KEYCLOAK_REALM': 'REALM',
-    'KEYCLOAK_REALM_PUBLIC_KEY': KEYCLOAK_REALM_PUBLIC_KEY,    
-    'KEYCLOAK_REAM_ALGORITHM': 'RS256',
-    'KEYCLOAK_CLIENT_ID': 'client-example',
-    'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    'KEYCLOAK_CLIENT_ID': 'client-backend',
+    'KEYCLOAK_CLIENT_SECRET_KEY': '41ab4e22-a6f3-4bef-86e3-f2a1c97d6387'
 }

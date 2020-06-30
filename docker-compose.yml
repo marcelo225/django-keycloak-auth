@@ -1,0 +1,38 @@
+version: "3"
+
+volumes:
+  my_data:
+
+networks:
+  my_network:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - my_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: deposito  
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123
+    networks:
+      - my_network 
+  
+  keycloak:
+      image: jboss/keycloak
+      environment:
+        DB_VENDOR: POSTGRES
+        DB_ADDR: db
+        DB_DATABASE: deposito
+        DB_USER: admin
+        DB_SCHEMA: public
+        DB_PASSWORD: 123
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: 123
+      ports:
+        - 8080:8080
+      depends_on:
+        - db
+      networks:
+        - my_network

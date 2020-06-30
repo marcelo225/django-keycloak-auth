@@ -39,20 +39,15 @@ class KeycloakMiddleware:
             self.server_url = self.config['KEYCLOAK_SERVER_URL']
             self.realm = self.config['KEYCLOAK_REALM']
             self.client_id = self.config['KEYCLOAK_CLIENT_ID']
-            
-            self.realm_public_key = self.config['KEYCLOAK_REALM_PUBLIC_KEY']
-            self.realm_algorithm = self.config.get('KEYCLOAK_REAM_ALGORITHM', 'RS256')
             self.client_secret_key = self.config['KEYCLOAK_CLIENT_SECRET_KEY']            
         except KeyError as e:
             raise Exception("The mandatory KEYCLOAK configuration variables has not defined.")
 
         # Create Keycloak instance
         self.keycloak = KeycloakConnect(server_url=self.server_url,
-                                        client_id=self.client_id,
                                         realm_name=self.realm,
-                                        realm_public_key=self.realm_public_key,
-                                        client_secret_key=self.client_secret_key,
-                                        realm_algorithm=self.realm_algorithm)
+                                        client_id=self.client_id,
+                                        client_secret_key=self.client_secret_key)
 
     def __call__(self, request):
         return self.get_response(request)
