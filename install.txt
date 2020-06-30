@@ -1,0 +1,7 @@
+pypi-AgEIcHlwaS5vcmcCJGJhNDYzMWFkLTEwMmEtNGUwMi1iZWQxLTg3YmU4ODU0Y2M1MQACJXsicGVybWlzc2lvbnMiOiAidXNlciIsICJ2ZXJzaW9uIjogMX0AAAYgtaqhpGWeTuur50qGcTqsFlid1p4QQbzE8RvCSAda9ww
+
+git remote add django-keycloak-auth https://github.com/marcelo225/django-keycloak-auth.git
+
+rm -rf dist/ && rm -rf django_keycloak_auth.egg-info/ && python setup.py sdist && twine check dist/*
+
+twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
