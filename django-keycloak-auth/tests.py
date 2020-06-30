@@ -17,7 +17,7 @@ class KeycloakMiddlewareTestCase(TestCase):
 
     def tearDown(self):
         settings.KEYCLOAK_EXEMPT_URIS = []
-        settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'https://localhost:8080/auth'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'http://localhost:8080/auth'
         settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'] = 'REALM'
         settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'] = 'client-backend'
         settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_SECRET_KEY'] = '41ab4e22-a6f3-4bef-86e3-f2a1c97d6387'
