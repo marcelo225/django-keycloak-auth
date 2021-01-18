@@ -105,7 +105,8 @@ class KeycloakMiddleware:
         token_roles = self.keycloak.roles_from_token(token)
         if token_roles is None:
             return JsonResponse(
-                {'detail': 'This token has no client_id roles or client_id has not configured correctly.'}, 
+                {'detail': 'This token has no client_id roles and no realm roles or client_id is not configured '
+                           'correctly.'},
                 status=AuthenticationFailed.status_code
             )
         
