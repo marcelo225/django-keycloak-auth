@@ -22,7 +22,30 @@
 
 Django Keycloak Auth is a simple library that authorizes your application's resources using Django Rest Framework.
 
-This package is used to perform authorization by keycloak roles.
+This package is used to perform authorization by keycloak roles from JWT token. Both realm roles and client roles are
+supported.
+
+For example, the following token indicates that the user has the realm role "manager" and the client
+roles "director" and "employer" :
+
+```
+...
+
+  "realm_access": {
+    "roles": [
+      "manager"
+    ]
+  },
+  "resource_access": {
+    "first-api": {
+      "roles": [
+        "director",
+        "employer",
+      ]
+    }
+  },
+  ...
+```
 
 For review see https://github.com/marcelo225/django-keycloak-auth
 
