@@ -22,7 +22,7 @@ from django.http.response import JsonResponse
 
 
 class KeycloakConnect:
-    
+
     def __init__(self, server_url, realm_name, client_id, client_secret_key=None):
         """Create Keycloak Instance.
 
@@ -63,7 +63,7 @@ class KeycloakConnect:
         """
         response = requests.request("GET", self.well_known_endpoint)
         return response.json()
-    
+
     def introspect(self, token, token_type_hint=None):
         """
         Introspection Request token
@@ -90,7 +90,7 @@ class KeycloakConnect:
 
         Returns:
             json: The introspect token
-        """        
+        """
         payload = {
             "token": token,
             "client_id": self.client_id,
@@ -100,10 +100,10 @@ class KeycloakConnect:
             'content-type': "application/x-www-form-urlencoded",
             'authorization': "Bearer " + token
         }
-        
+
         response = requests.request("POST", self.token_introspection_endpoint, data=payload, headers=headers)
         return response.json()
-    
+
     def is_token_active(self, token):
         """Verify if introspect token is active.
 
@@ -114,7 +114,7 @@ class KeycloakConnect:
             bollean: Token valid (True) or invalid (False)
         """
         introspect_token = self.introspect(token)
-        is_active = introspect_token.get('active', None)       
+        is_active = introspect_token.get('active', None)
         return True if is_active else False
 
     def roles_from_token(self, token):
@@ -127,24 +127,32 @@ class KeycloakConnect:
         Returns:
             list: List of roles.
         """
-        token_decoded = self.introspect(token)        
-        if not self.client_id in token_decoded['resource_access']:
-            return None
-        resource_access = token_decoded['resource_access'].get(self.client_id, None)        
-        return resource_access.get('roles', None)
+        token_decoded = self.introspect(token)
+
+        realm_access = token_decoded.get('realm_access', None)
+        resource_access = token_decoded.get('resource_access', None)
+        client_access = resource_access.get(self.client_id, None) if resource_access is not None else None
+
+        client_roles = client_access.get('roles', None) if client_access is not None else None
+        realm_roles = realm_access.get('roles', None) if realm_access is not None else None
+
+        if client_roles is None:
+            return realm_roles
+        if realm_roles is None:
+            return client_roles
+        return client_roles + realm_roles
 
     def userinfo(self, token):
         """Get user info from authenticated token
 
         Args:
-            token (str): The string value of the token. 
+            token (str): The string value of the token.
 
         Returns:
-            json: user info data            
+            json: user info data
         """
         headers = {
             'authorization': "Bearer " + token
         }
         response = requests.request("GET", self.userinfo_endpoint, headers=headers)
         return response.json()
-
