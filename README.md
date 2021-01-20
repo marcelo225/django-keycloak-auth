@@ -224,7 +224,7 @@ $ python manage.py test
 
 ## Install this package to Pypi
 
-`Obs.: Before you update this package, certifies if you'll change the version in [setup.py](setup.py#11) file`
+`Obs.: Before you update this package, certifies if you'll change the version in setup.py file`
 
 If you interested contribute to developing this project, it was prepared a tiny tutorial to install the environment before you begin:
 
