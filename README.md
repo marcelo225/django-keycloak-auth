@@ -15,6 +15,7 @@
   - [ModelViewSet](#modelviewset)
   - [ViewSet](#viewset)
   - [APIView](#apiview)
+  - [How to run tests for this lib](#how-to-run-tests-for-this-lib)
   - [Install this package to Pypi](#install-this-package-to-pypi)
   - [Install keycloak](#install-keycloak)
 
@@ -205,7 +206,25 @@ class JudgementView(views.APIView):
 
 When you don't put **keycloak_roles** attribute in the Views that means all methods authorizations will be allowed.
 
+## How to run tests for this lib
+
+Before everything, you must install VirtualEnv.
+
+```bash
+# Install venv in root project folder
+$ python3 -m venv env && source env/bin/activate
+
+# Install dependences
+$ pip install -r requirements.txt
+
+# Run tests
+$ python manage.py test
+
+```
+
 ## Install this package to Pypi
+
+`Obs.: Before you update this package, certifies if you'll change the version in [setup.py](setup.py#11) file`
 
 If you interested contribute to developing this project, it was prepared a tiny tutorial to install the environment before you begin:
 
