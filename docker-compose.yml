@@ -13,12 +13,12 @@ services:
     volumes:
       - my_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: deposito  
+      POSTGRES_DB: deposito
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: 123
     networks:
-      - my_network 
-  
+      - my_network
+
   keycloak:
       image: jboss/keycloak
       environment:

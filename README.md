@@ -107,7 +107,7 @@ MIDDLEWARE = [
 
 #...
 
-# Exempt URIS 
+# Exempt URIS
 # For example: ['core/banks', 'swagger']
 KEYCLOAK_EXEMPT_URIS = []
 KEYCLOAK_CONFIG = {
@@ -135,11 +135,11 @@ from rest_framework.exceptions import PermissionDenied
 
 class BankViewSet(viewsets.ModelViewSet):
     """
-    Bank endpoint    
-    This endpoint has all configured keycloak roles    
+    Bank endpoint
+    This endpoint has all configured keycloak roles
     """
     serializer_class = serializers.BankSerializer
-    queryset = models.Bank.objects.all()    
+    queryset = models.Bank.objects.all()
     keycloak_roles = {
         'GET': ['director', 'judge', 'employee'],
         'POST': ['director', 'judge', ],
@@ -151,13 +151,13 @@ class BankViewSet(viewsets.ModelViewSet):
     def list(self, request):
         """
         Overwrite method
-        You can especify your rules inside each method 
+        You can especify your rules inside each method
         using the variable 'request.roles' that means a
         list of roles that came from authenticated token.
         See the following example bellow:
         """
         # list of token roles
-        print(request.roles)        
+        print(request.roles)
         return super().list(self, request)
 ```
 
@@ -168,11 +168,11 @@ class BankViewSet(viewsets.ModelViewSet):
 class CarViewSet(viewsets.ViewSet):
     """
     Car endpoint
-    This endpoint has not configured keycloak roles. 
+    This endpoint has not configured keycloak roles.
     That means all methods will be allowed to access.
-    """    
+    """
     def list(self, request):
-        return JsonResponse({"detail": "success"}, status=status.HTTP_200_OK)        
+        return JsonResponse({"detail": "success"}, status=status.HTTP_200_OK)
 
 ```
 
@@ -189,18 +189,18 @@ class JudgementView(views.APIView):
     keycloak_roles = {
         'GET': ['judge'],
     }
-    
+
     def get(self, request, format=None):
         """
         Overwrite method
-        You can especify your rules inside each method 
+        You can especify your rules inside each method
         using the variable 'request.roles' that means a
         list of roles that came from authenticated token.
         See the following example bellow:
         """
         # list of token roles
         print(request.roles)
-        return super().get(self, request)    
+        return super().get(self, request)
 
 ```
 
@@ -224,7 +224,8 @@ $ python manage.py test
 
 ## Install this package to Pypi
 
-`Obs.: Before you update this package, certifies if you'll change the version in setup.py file`
+> **Warning**: before you update this package, certifies if you'll change the
+> version in `setup.py` file.
 
 If you interested contribute to developing this project, it was prepared a tiny tutorial to install the environment before you begin:
 
@@ -233,7 +234,7 @@ If you interested contribute to developing this project, it was prepared a tiny 
 $ python3 -m venv env && source env/bin/activate
 
 # Update packages
-$ python -m pip install --upgrade pip Django djangorestframework requests python-jose twine setuptools wheel
+$ python -m pip install --upgrade -r requirements-development.txt
 
 # Generate distribuition -> it's on me for while ;)
 $ python setup.py sdist
@@ -257,4 +258,4 @@ If you wanna run keycloak docker container:
 $ docker-compose up
 ```
 
-2. type http:localhost:8080/ in your web browser 
+2. Open http://localhost:8080/ in your web browser
