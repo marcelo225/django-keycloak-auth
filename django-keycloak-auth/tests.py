@@ -14,7 +14,8 @@ class KeycloakMiddlewareTestCase(TestCase):
     def setUp(self):
         self.uri = '/core/banks'
         self.client = Client()
-        self.factory = RequestFactory()
+        self.factory = RequestFactory()        
+        KeycloakConnect.userinfo = Mock(return_value={})
 
     def tearDown(self):
         settings.KEYCLOAK_EXEMPT_URIS = []
@@ -99,14 +100,14 @@ class KeycloakMiddlewareTestCase(TestCase):
 
         # WHEN makes GET request without HTTP_AUTHORIZATIOND
         request = self.factory.get(self.uri)
-        response = KeycloakMiddleware(Mock()).process_view(request, view, [], {})
+        response = KeycloakMiddleware(Mock()).process_view(request, view, [], {})        
 
         # THEN not allows endpoint to be accessed (401)
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_when_token_not_active(self):
         # GIVEN token as not valid
-        KeycloakConnect.is_token_active = Mock(return_value=False)
+        KeycloakConnect.is_token_active = Mock(return_value=False)        
 
         # GIVEN a View endpoint
         view = views.BankViewSet.as_view({'get': 'list'})
@@ -164,7 +165,7 @@ class KeycloakMiddlewareTestCase(TestCase):
 
     def test_when_token_as_active_and_has_roles_request_authorizated(self):
         # GIVEN token as valid
-        KeycloakConnect.is_token_active = Mock(return_value=True)
+        KeycloakConnect.is_token_active = Mock(return_value=True)        
 
         # GIVEN token has roles
         KeycloakConnect.roles_from_token = Mock(return_value=['director'])
@@ -202,6 +203,7 @@ class KeycloakMiddlewareTestCase(TestCase):
                                    settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
                                    settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
         keycloak.introspect = Mock(return_value=fake_token)
+        keycloak.userinfo = Mock(return_value=fake_token)
         roles = keycloak.roles_from_token(Mock())
 
         self.assertEquals(['judge', 'director'], roles)
@@ -219,6 +221,7 @@ class KeycloakMiddlewareTestCase(TestCase):
                                    settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
                                    settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
         keycloak.introspect = Mock(return_value=fake_token)
+        keycloak.userinfo = Mock(return_value=fake_token)
         roles = keycloak.roles_from_token(Mock())
 
         self.assertEquals(['director'], roles)
@@ -238,6 +241,7 @@ class KeycloakMiddlewareTestCase(TestCase):
                                    settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
                                    settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
         keycloak.introspect = Mock(return_value=fake_token)
+        keycloak.userinfo = Mock(return_value=fake_token)
         roles = keycloak.roles_from_token(Mock())
 
         self.assertEquals(['judge'], roles)
@@ -249,6 +253,23 @@ class KeycloakMiddlewareTestCase(TestCase):
                                    settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
                                    settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
         keycloak.introspect = Mock(return_value=fake_token)
+        keycloak.userinfo = Mock(return_value=fake_token)
         roles = keycloak.roles_from_token(Mock())
 
         self.assertEquals(None, roles)
+    
+    def test_when_only_user_info_is_present_user_info_are_returned(self):
+        fake_token = {
+            "sub": "d0a45bca-edf3-4334-a195-db827349a52d",
+            "email_verified": False,
+            "preferred_username": "test-api"
+        }
+        keycloak = KeycloakConnect(settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
+                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
+                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
+        keycloak.introspect = Mock(return_value=fake_token)
+        keycloak.userinfo = Mock(return_value=fake_token)
+        
+        userinfo = keycloak.userinfo(Mock())        
+        
+        self.assertEquals(fake_token['sub'], userinfo['sub'])

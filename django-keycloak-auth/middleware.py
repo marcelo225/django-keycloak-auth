@@ -116,3 +116,6 @@ class KeycloakMiddleware:
         
         # Add to View request param list of roles from authenticated token
         request.roles = token_roles
+
+        # Add to userinfo to the view
+        request.userinfo = self.keycloak.userinfo(token)
