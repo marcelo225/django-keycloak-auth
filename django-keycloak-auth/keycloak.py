@@ -184,7 +184,7 @@ class KeycloakConnect:
         return client_roles + realm_roles
 
     def userinfo(self, token):
-        """Get user info from authenticated token
+        """Get userinfo (sub attribute from JWT) from authenticated token
 
         Args:
             token (str): The string value of the token.

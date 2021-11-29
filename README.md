@@ -158,6 +158,10 @@ class BankViewSet(viewsets.ModelViewSet):
         """
         # list of token roles
         print(request.roles)
+
+        # Optional: get userinfo (SUB attribute from JWT)
+        print(request.userinfo)
+
         return super().list(self, request)
 ```
 
@@ -200,6 +204,10 @@ class JudgementView(views.APIView):
         """
         # list of token roles
         print(request.roles)
+
+        # Optional: get userinfo (SUB attribute from JWT)
+        print(request.userinfo)
+
         return super().get(self, request)
 
 ```
@@ -233,7 +241,7 @@ If you interested contribute to developing this project, it was prepared a tiny 
 # Install venv in root project folder
 $ python3 -m venv env && source env/bin/activate
 
-# Update packages
+# Update packages for development
 $ python -m pip install --upgrade -r requirements-development.txt
 
 # Generate distribuition -> it's on me for while ;)
