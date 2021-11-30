@@ -2,6 +2,7 @@
 
 - [Django Keycloak Auth](#django-keycloak-auth)
   - [What is it?](#what-is-it)
+  - [Buy me a coffee](#buy-me-a-coffee)
   - [Installation](#installation)
     - [Via Pypi Package:](#via-pypi-package)
     - [Manually](#manually)
@@ -51,6 +52,12 @@ roles "director" and "employer" :
 For review see https://github.com/marcelo225/django-keycloak-auth
 
 Package link: https://pypi.org/project/django-keycloak-auth/
+
+## Buy me a coffee
+
+If you have recognized my effort in this initiative, please buy me a coffee when possible.
+
+![coffee](qr_code.png)
 
 ## Installation
 
