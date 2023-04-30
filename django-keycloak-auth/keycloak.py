@@ -21,6 +21,8 @@ import requests
 from django.http.response import JsonResponse
 import logging
 
+from requests import HTTPError
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -71,24 +73,41 @@ class KeycloakConnect:
             + "/protocol/openid-connect/userinfo"
         )
 
-    def well_known(self):
+    @staticmethod
+    def _send_request(method, url, **kwargs):
+        """Send request by method and url.
+         Raises HTTPError exceptions if status >= 400
+
+         Returns:
+             json: Response body
+         """
+        response = requests.request(method, url, **kwargs)
+        response.raise_for_status()
+        return response.json()
+
+    def well_known(self, raise_exception=True):
         """Lists endpoints and other configuration options 
         relevant to the OpenID Connect implementation in Keycloak.
+
+        Args:
+            raise_exception: Raise exception if the request ended with a status >= 400.
 
         Returns:
             [type]: [list of keycloak endpoints]
         """
-        response = requests.request("GET", self.well_known_endpoint)
-        error = response.raise_for_status()
-        if error:
+        try:
+            response = self._send_request("GET", self.well_known_endpoint)
+        except HTTPError as ex:
             LOGGER.error(
                 "Error obtaining list of endpoints from endpoint: "
-                f"{self.well_known_endpoint}, response error {error}"
+                f"{self.well_known_endpoint}, response error {ex}"
             )
+            if raise_exception:
+                raise
             return {}
-        return response.json()
+        return response
 
-    def introspect(self, token, token_type_hint=None):
+    def introspect(self, token, token_type_hint=None, raise_exception=True):
         """
         Introspection Request token
         Implementation: https://tools.ietf.org/html/rfc7662#section-2.1
@@ -111,6 +130,7 @@ class KeycloakConnect:
                 is able to detect the token type automatically.  Values for this
                 field are defined in the "OAuth Token Type Hints" registry defined
                 in OAuth Token Revocation [RFC7009].
+            raise_exception: Raise exception if the request ended with a status >= 400.
 
         Returns:
             json: The introspect token
@@ -124,43 +144,46 @@ class KeycloakConnect:
             "content-type": "application/x-www-form-urlencoded",
             "authorization": "Bearer " + token,
         }
-        response = requests.request(
-            "POST", self.token_introspection_endpoint, data=payload, headers=headers
-        )
-        error = response.raise_for_status()
-        if error:
+        try:
+            response = self._send_request(
+                "POST", self.token_introspection_endpoint, data=payload, headers=headers)
+        except HTTPError as ex:
             LOGGER.error(
                 "Error obtaining introspect token from endpoint: "
                 f"{self.token_introspection_endpoint}, data {payload}, "
-                f" headers {headers}, response error {error}"
+                f" headers {headers}, response error {ex}"
             )
+            if raise_exception:
+                raise
             return {}
-        return response.json()
+        return response
 
-    def is_token_active(self, token):
+    def is_token_active(self, token, raise_exception=True):
         """Verify if introspect token is active.
 
         Args:
-            token (str): The string value of the token. 
+            token (str): The string value of the token.
+            raise_exception: Raise exception if the request ended with a status >= 400.
 
         Returns:
             bollean: Token valid (True) or invalid (False)
         """
-        introspect_token = self.introspect(token)
+        introspect_token = self.introspect(token, raise_exception)
         is_active = introspect_token.get("active", None)
         return True if is_active else False
 
-    def roles_from_token(self, token):
+    def roles_from_token(self, token, raise_exception=True):
         """
         Get roles from token
 
         Args:
             token (string): The string value of the token.
+            raise_exception: Raise exception if the request ended with a status >= 400.
 
         Returns:
             list: List of roles.
         """
-        token_decoded = self.introspect(token)
+        token_decoded = self.introspect(token, raise_exception)
 
         realm_access = token_decoded.get("realm_access", None)
         resource_access = token_decoded.get("resource_access", None)
@@ -183,23 +206,27 @@ class KeycloakConnect:
             return client_roles
         return client_roles + realm_roles
 
-    def userinfo(self, token):
+    def userinfo(self, token, raise_exception=True):
         """Get userinfo (sub attribute from JWT) from authenticated token
 
         Args:
             token (str): The string value of the token.
+            raise_exception: Raise exception if the request ended with a status >= 400.
 
         Returns:
             json: user info data
         """
         headers = {"authorization": "Bearer " + token}
-        response = requests.request("GET", self.userinfo_endpoint, headers=headers)
-        error = response.raise_for_status()
-        if error:
+        try:
+            response = self._send_request(
+                "GET", self.userinfo_endpoint, headers=headers)
+        except HTTPError as ex:
             LOGGER.error(
                 "Error obtaining userinfo token from endpoint: "
                 f"{self.userinfo_endpoint}, headers {headers}, "
-                f"response error {response.raise_for_status()}"
+                f"response error {ex}"
             )
+            if raise_exception:
+                raise
             return {}
-        return response.json()
+        return response
