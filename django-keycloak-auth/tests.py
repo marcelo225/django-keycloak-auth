@@ -1,4 +1,5 @@
 from django.test import TestCase, Client, RequestFactory
+from requests import HTTPError
 from rest_framework import status
 from django.conf import settings
 from .middleware import KeycloakMiddleware, KeycloakConnect
@@ -273,3 +274,31 @@ class KeycloakMiddlewareTestCase(TestCase):
         userinfo = keycloak.userinfo(Mock())        
         
         self.assertEquals(fake_token['sub'], userinfo['sub'])
+
+    def test_keycloak_connect_well_known(self):
+        """Test keycloak endpoint well_known when status >= 400"""
+        keycloak = KeycloakConnect(
+            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
+            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
+            settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'],
+        )
+        keycloak._send_request = Mock(side_effect=HTTPError)
+        result = keycloak.well_known(raise_exception=False)
+        self.assertDictEqual({}, result)
+
+        with self.assertRaises(HTTPError):
+            keycloak.well_known()
+
+    def test_keycloak_connect_introspect(self):
+        """Test keycloak endpoint introspect when status >= 400"""
+        keycloak = KeycloakConnect(
+            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
+            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
+            settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'],
+        )
+        keycloak._send_request = Mock(side_effect=HTTPError)
+        result = keycloak.introspect('', raise_exception=False)
+        self.assertDictEqual({}, result)
+
+        with self.assertRaises(HTTPError):
+            keycloak.introspect('')
