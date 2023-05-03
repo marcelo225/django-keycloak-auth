@@ -249,7 +249,7 @@ If you interested contribute to developing this project, it was prepared a tiny 
 $ python3 -m venv env && source env/bin/activate
 
 # Update packages for development
-$ python -m pip install --upgrade -r requirements-development.txt
+$ python -m pip install --upgrade -r requirements.txt
 
 # Generate distribuition -> it's on me for while ;)
 $ python setup.py sdist
