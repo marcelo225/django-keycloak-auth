@@ -108,7 +108,7 @@ Lead Developer - Marcelo Vinicius
 ```python
 MIDDLEWARE = [
     #...
-    'django-keycloak-auth.middleware.KeycloakMiddleware',
+    'django_keycloak_auth.middleware.KeycloakMiddleware',
     #...
 ]
 

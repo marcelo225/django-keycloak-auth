@@ -55,10 +55,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # keycloak interceptor
-    'django-keycloak-auth.middleware.KeycloakMiddleware',
+    'django_keycloak_auth.middleware.KeycloakMiddleware',
 ]
 
-ROOT_URLCONF = 'django-keycloak-auth.urls'
+ROOT_URLCONF = 'django_keycloak_auth.urls'
 
 TEMPLATES = [
     {
