@@ -126,7 +126,7 @@ KEYCLOAK_CONFIG = {
 
 ```
 
-# How to use
+# How to use with class-based views
 
 This is an example how to apply on your Views
 
@@ -216,6 +216,23 @@ class JudgementView(views.APIView):
         print(request.userinfo)
 
         return super().get(self, request)
+
+```
+
+# How to use with function-based views
+
+```python
+
+@keycloak_roles({'POST': ['director', 'employee']})
+@api_view(['POST'])
+def refinance_loan(request):
+    """
+    Refinance loan endpoint
+    This endpoint has configured keycloak roles only POST method 
+    and only POST methods will be accepted in api_view.
+    """
+    print(request.roles)
+    return JsonResponse({"detail": "success"}, status=status.HTTP_200_OK)
 
 ```
 

@@ -1,9 +1,10 @@
 from rest_framework import viewsets, views
 from . import models, serializers
 from rest_framework import status
+from rest_framework.decorators import api_view
 from django.http.response import JsonResponse
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, NotAuthenticated
-
+from django_keycloak_auth import keycloak_roles
 
 class BankViewSet(viewsets.ModelViewSet):
     """
@@ -65,3 +66,14 @@ class JudgementView(views.APIView):
         print(request.roles)
         return super().get(self, request) 
 
+
+@keycloak_roles({'POST': ['director', 'employee']})
+@api_view(['POST'])
+def refinance_loan(request):
+    """
+    Refinance loan endpoint
+    This endpoint has configured keycloak roles only POST method 
+    and only POST methods will be accepted in api_view.
+    """
+    print(request.roles)
+    return JsonResponse({"detail": "success"}, status=status.HTTP_200_OK)

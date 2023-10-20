@@ -23,4 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('core/', include(core_route.urls)),
     path('judgements/', views.JudgementView.as_view()),
+    path('refinance_loan/', views.refinance_loan),
 ]

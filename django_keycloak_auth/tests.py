@@ -2,7 +2,7 @@ from django.test import TestCase, Client, RequestFactory
 from requests import HTTPError
 from rest_framework import status
 from django.conf import settings
-from .middleware import KeycloakMiddleware, KeycloakConnect
+from .middleware import KeycloakMiddleware, KeycloakConnect, keycloak_roles
 from core import views
 from unittest.mock import Mock
 
@@ -302,3 +302,62 @@ class KeycloakMiddlewareTestCase(TestCase):
 
         with self.assertRaises(HTTPError):
             keycloak.introspect('')
+
+
+class KeycloakRolesDecoratorTestCase(TestCase):
+
+    def setUp(self):
+        self.uri = '/core/refinance_loan'
+        self.client = Client()
+        self.factory = RequestFactory()
+
+    def tearDown(self):
+        settings.KEYCLOAK_EXEMPT_URIS = []
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'http://localhost:8080/auth'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'] = 'REALM'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'] = 'client-backend'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_SECRET_KEY'] = '41ab4e22-a6f3-4bef-86e3-f2a1c97d6387'
+        
+    def test_when_token_is_active_and_has_roles_request_not_authorizated(self):
+        # GIVEN token as valid
+        KeycloakConnect.is_token_active = Mock(return_value=True)
+
+        # GIVEN token has different role
+        KeycloakConnect.roles_from_token = Mock(return_value=['xxxxxx'])
+
+        # GIVEN a Function endpoint has 'director'  role on GET method
+        @keycloak_roles({'GET': ['director']})
+        def api_func(request):
+            pass
+
+        # GIVEN a fake request
+        request = self.factory.get(self.uri)
+        request.META['HTTP_AUTHORIZATION'] = 'Bearer token_fake'
+
+        # WHEN middleware is processed
+        response = api_func(request)
+
+        # THEN does't allow endpoint authorization
+        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
+        
+    def test_when_token_is_active_and_has_roles_request_authorizated(self):
+        # GIVEN token as valid
+        KeycloakConnect.is_token_active = Mock(return_value=True)        
+
+        # GIVEN token has roles
+        KeycloakConnect.roles_from_token = Mock(return_value=['director'])
+
+        # GIVEN a Function endpoint has 'director'  role on GET method
+        @keycloak_roles({'GET': ['director']})
+        def api_func(request):
+            pass
+
+        # GIVEN a fake request
+        request = self.factory.get(self.uri)
+        request.META['HTTP_AUTHORIZATION'] = 'Bearer token_fake'
+
+        # WHEN middleware is processed
+        response = api_func(request)
+
+        # THEN allows endpoint and pass token roles to request View
+        self.assertEquals(['director'], request.roles)

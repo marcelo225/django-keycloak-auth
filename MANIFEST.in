@@ -2,5 +2,3 @@ include LICENSE
 include README.md
 recursive-include core/static *
 recursive-include core/templates *
-recursive-include django_keycloak_auth/static *
-recursive-include django_keycloak_auth/templates *
