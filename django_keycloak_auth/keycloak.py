@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import requests
-from django.http.response import JsonResponse
 import logging
 
 from requests import HTTPError

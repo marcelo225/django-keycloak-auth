@@ -12,13 +12,16 @@
   - [Licence](#licence)
   - [Credits](#credits)
   - [Usage](#usage)
-- [How to use](#how-to-use)
-  - [ModelViewSet](#modelviewset)
-  - [ViewSet](#viewset)
-  - [APIView](#apiview)
-  - [How to run tests for this lib](#how-to-run-tests-for-this-lib)
-  - [Install this package to Pypi](#install-this-package-to-pypi)
-  - [Install keycloak](#install-keycloak)
+  - [How to apply on your Views](#how-to-apply-on-your-views)
+    - [Class-based Views](#class-based-views)
+      - [ModelViewSet](#modelviewset)
+      - [ViewSet](#viewset)
+      - [APIView](#apiview)
+    - [Function Based Views](#function-based-views)
+  - [Local development](#local-development)
+    - [Run tests for this lib](#run-tests-for-this-lib)
+    - [Upload this package to Pypi](#upload-this-package-to-pypi)
+    - [Run local API test using this library](#run-local-api-test-using-this-library)
 
 ## What is it?
 
@@ -103,12 +106,12 @@ Lead Developer - Marcelo Vinicius
 
 ## Usage
 
-1. In settings.py add following Middleware bellow:
+1. In your application `settings.py` file, add following Middleware:
 
 ```python
 MIDDLEWARE = [
     #...
-    'django_keycloak_auth.middleware.KeycloakMiddleware',
+    'django-keycloak-auth.middleware.KeycloakMiddleware',
     #...
 ]
 
@@ -119,18 +122,18 @@ MIDDLEWARE = [
 KEYCLOAK_EXEMPT_URIS = []
 KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
-    'KEYCLOAK_REALM': 'TESTE',
+    'KEYCLOAK_REALM': 'TEST',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
     'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
 }
 
 ```
 
-# How to use with class-based views
+## How to apply on your Views
 
-This is an example how to apply on your Views
+### Class-based Views
 
-## ModelViewSet
+#### ModelViewSet
 
 ```python
 
@@ -172,7 +175,7 @@ class BankViewSet(viewsets.ModelViewSet):
         return super().list(self, request)
 ```
 
-## ViewSet
+#### ViewSet
 
 ```python
 
@@ -187,7 +190,7 @@ class CarViewSet(viewsets.ViewSet):
 
 ```
 
-## APIView
+#### APIView
 
 ```python
 
@@ -219,26 +222,27 @@ class JudgementView(views.APIView):
 
 ```
 
-# How to use with function-based views
-
-```python
-
-@keycloak_roles({'POST': ['director', 'employee']})
-@api_view(['POST'])
-def refinance_loan(request):
-    """
-    Refinance loan endpoint
-    This endpoint has configured keycloak roles only POST method 
-    and only POST methods will be accepted in api_view.
-    """
-    print(request.roles)
-    return JsonResponse({"detail": "success"}, status=status.HTTP_200_OK)
-
-```
-
 When you don't put **keycloak_roles** attribute in the Views that means all methods authorizations will be allowed.
 
-## How to run tests for this lib
+### Function Based Views
+
+When if you use `api_view` decorator, you would write a very simple `@keycloak_roles` decorator like this:
+
+```python
+@keycloak_roles(['director', 'judge', 'employee'])
+@api_view(['GET'])
+def loans(request):
+    """
+    List loan endpoint
+    This endpoint has configured keycloak roles only 
+    especific GET method will be accepted in api_view.
+    """
+    return JsonResponse({"message": request.roles})
+```
+
+## Local development
+
+### Run tests for this lib
 
 Before everything, you must install VirtualEnv.
 
@@ -254,7 +258,7 @@ $ python manage.py test
 
 ```
 
-## Install this package to Pypi
+### Upload this package to Pypi
 
 > **Warning**: before you update this package, certifies if you'll change the
 > version in `setup.py` file.
@@ -279,11 +283,9 @@ $ twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
 
 ```
 
-## Install keycloak
+### Run local API test using this library
 
-If you wanna run keycloak docker container:
-
-1. Run following command on terminal:
+1. Run following command on terminal to up [Keycloak](https://www.keycloak.org/) docker container:
 
 ```bash
 # in root project folder
@@ -291,3 +293,34 @@ $ docker-compose up
 ```
 
 2. Open http://localhost:8080/ in your web browser
+3. Create the following steps: 
+   1. `realm`, `client` (as confidential) and your `client secret` according the [settings.py](/django-keycloak-auth/settings.py#L148) file
+   2. Client Roles: `director`, `judge`, `employee` 
+   3. Create a new user account
+   4. Vinculate Client Roles into above user account
+
+
+4. Run following command on another terminal:
+
+```bash
+# Install venv in root project folder
+$ python3 -m venv env && source env/bin/activate
+
+# Install dependences for this library
+$ python -m pip install --upgrade -r requirements.txt
+
+# Generate a local distribution for django-keyclaok-auth
+$ python setup.py sdist
+
+# Generate a local dist (verify version)
+$ pip install dist/django-keycloak-auth-X.X.X.tar.gz
+
+# Create migrations, fixtures and run django server
+$ python manage.py makemigrations && \
+  python manage.py migrate && \
+  python manage.py loaddata banks.json && \
+  python manage.py runserver
+```
+
+5. Starting development server at http://127.0.0.1:8000/
+6. Use [Insonmina](https://insomnia.rest/) or [Postman](https://www.postman.com/) to test API's endpoints using Oauth2 as authentication mode.

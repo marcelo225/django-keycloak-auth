@@ -2,15 +2,12 @@ from django.test import TestCase, Client, RequestFactory
 from requests import HTTPError
 from rest_framework import status
 from django.conf import settings
-from .middleware import KeycloakMiddleware, KeycloakConnect, keycloak_roles
+from .middleware import KeycloakMiddleware, KeycloakConnect
 from core import views
 from unittest.mock import Mock
 
 
-class KeycloakMiddlewareTestCase(TestCase):
-
-    # Fixture prerequisites to run the tests
-    # fixtures = ['banks']
+class KeycloakConfigTestCase(TestCase):
 
     def setUp(self):
         self.uri = '/core/banks'
@@ -21,18 +18,18 @@ class KeycloakMiddlewareTestCase(TestCase):
     def tearDown(self):
         settings.KEYCLOAK_EXEMPT_URIS = []
         settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'http://localhost:8080/auth'
-        settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'] = 'REALM'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'] = 'TEST'
         settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'] = 'client-backend'
         settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_SECRET_KEY'] = '41ab4e22-a6f3-4bef-86e3-f2a1c97d6387'
 
     def test_when_has_not_some_keycloak_configuration_settings(self):
         # GIVEN doesn't configurated keycloak django settings
-        del settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL']
+        del settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL']        
 
         # WHEN makes a request
         # THEN throws configuration exception
         with self.assertRaises(Exception):
-            response = self.client.get(self.uri)
+            self.client.get(self.uri)
             KeycloakMiddleware(Mock)(self.request)
 
     def test_when_has_not_keycloak_server_url_configuration_settings(self):
@@ -42,7 +39,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         # WHEN makes a request
         # THEN throws configuration exception
         with self.assertRaises(Exception):
-            response = self.client.get(self.uri)
+            self.client.get(self.uri)
             KeycloakMiddleware(Mock)(self.request)
 
     def test_when_has_not_keycloak_realm_configuration_settings(self):
@@ -52,7 +49,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         # WHEN makes a request
         # THEN throws configuration exception
         with self.assertRaises(Exception):
-            response = self.client.get(self.uri)
+            self.client.get(self.uri)
             KeycloakMiddleware(Mock)(self.request)
 
     def test_when_has_not_keycloak_client_secret_key_configuration_settings(self):
@@ -62,7 +59,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         # WHEN makes a request
         # THEN throws configuration exception
         with self.assertRaises(Exception):
-            response = self.client.get(self.uri)
+            self.client.get(self.uri)
             KeycloakMiddleware(Mock)(self.request)
 
     def test_when_has_not_keycloak_client_id_configuration_settings(self):
@@ -72,10 +69,31 @@ class KeycloakMiddlewareTestCase(TestCase):
         # WHEN makes a request
         # THEN throws configuration exception
         with self.assertRaises(Exception):
-            response = self.client.get(self.uri)
+            self.client.get(self.uri)
             KeycloakMiddleware(Mock)(self.request)
 
-    def test_when_some_URI_is_permitted_on_authentication_with_keycloak_roles_on_view(self):
+
+class KeycloakMiddlewareTestCase(TestCase):
+
+    def setUp(self):
+        self.uri = '/core/banks'
+        self.client = Client()
+        self.factory = RequestFactory()        
+        KeycloakConnect.userinfo = Mock(return_value={})
+        self.keycloak = KeycloakConnect(
+            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
+            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
+            settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'],
+        )
+
+    def tearDown(self):
+        settings.KEYCLOAK_EXEMPT_URIS = []
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'http://localhost:8080/auth'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'] = 'TEST'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'] = 'client-backend'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_SECRET_KEY'] = '41ab4e22-a6f3-4bef-86e3-f2a1c97d6387'
+
+    def test_when_some_EXEMPT_URI_is_permitted_on_authentication_with_keycloak_roles_on_view(self):
         # GIVEN that a URL has been given that it will fire without authorization
         settings.KEYCLOAK_EXEMPT_URIS = ['core/banks']
 
@@ -166,7 +184,7 @@ class KeycloakMiddlewareTestCase(TestCase):
 
     def test_when_token_as_active_and_has_roles_request_authorizated(self):
         # GIVEN token as valid
-        KeycloakConnect.is_token_active = Mock(return_value=True)        
+        KeycloakConnect.is_token_active = Mock(return_value=True)
 
         # GIVEN token has roles
         KeycloakConnect.roles_from_token = Mock(return_value=['director'])
@@ -199,13 +217,9 @@ class KeycloakMiddlewareTestCase(TestCase):
                     ]
                 }
             }}
-
-        keycloak = KeycloakConnect(settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
-        keycloak.introspect = Mock(return_value=fake_token)
-        keycloak.userinfo = Mock(return_value=fake_token)
-        roles = keycloak.roles_from_token(Mock())
+        self.keycloak.introspect = Mock(return_value=fake_token)
+        self.keycloak.userinfo = Mock(return_value=fake_token)
+        roles = self.keycloak.roles_from_token(Mock())
 
         self.assertEquals(['judge', 'director'], roles)
 
@@ -217,13 +231,9 @@ class KeycloakMiddlewareTestCase(TestCase):
                 ]
             },
         }
-
-        keycloak = KeycloakConnect(settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
-        keycloak.introspect = Mock(return_value=fake_token)
-        keycloak.userinfo = Mock(return_value=fake_token)
-        roles = keycloak.roles_from_token(Mock())
+        self.keycloak.introspect = Mock(return_value=fake_token)
+        self.keycloak.userinfo = Mock(return_value=fake_token)
+        roles = self.keycloak.roles_from_token(Mock())
 
         self.assertEquals(['director'], roles)
 
@@ -237,25 +247,17 @@ class KeycloakMiddlewareTestCase(TestCase):
                 }
             }
         }
-
-        keycloak = KeycloakConnect(settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
-        keycloak.introspect = Mock(return_value=fake_token)
-        keycloak.userinfo = Mock(return_value=fake_token)
-        roles = keycloak.roles_from_token(Mock())
+        self.keycloak.introspect = Mock(return_value=fake_token)
+        self.keycloak.userinfo = Mock(return_value=fake_token)
+        roles = self.keycloak.roles_from_token(Mock())
 
         self.assertEquals(['judge'], roles)
 
     def test_when_no_role_is_present_none_is_returned(self):
         fake_token = {}
-
-        keycloak = KeycloakConnect(settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
-        keycloak.introspect = Mock(return_value=fake_token)
-        keycloak.userinfo = Mock(return_value=fake_token)
-        roles = keycloak.roles_from_token(Mock())
+        self.keycloak.introspect = Mock(return_value=fake_token)
+        self.keycloak.userinfo = Mock(return_value=fake_token)
+        roles = self.keycloak.roles_from_token(Mock())
 
         self.assertEquals(None, roles)
     
@@ -265,99 +267,95 @@ class KeycloakMiddlewareTestCase(TestCase):
             "email_verified": False,
             "preferred_username": "test-api"
         }
-        keycloak = KeycloakConnect(settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-                                   settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'])
-        keycloak.introspect = Mock(return_value=fake_token)
-        keycloak.userinfo = Mock(return_value=fake_token)
+        self.keycloak.introspect = Mock(return_value=fake_token)
+        self.keycloak.userinfo = Mock(return_value=fake_token)
         
-        userinfo = keycloak.userinfo(Mock())        
+        userinfo = self.keycloak.userinfo(Mock())
         
         self.assertEquals(fake_token['sub'], userinfo['sub'])
 
     def test_keycloak_connect_well_known(self):
-        """Test keycloak endpoint well_known when status >= 400"""
-        keycloak = KeycloakConnect(
-            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-            settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'],
-        )
-        keycloak._send_request = Mock(side_effect=HTTPError)
-        result = keycloak.well_known(raise_exception=False)
+        """Test keycloak endpoint well_known when status >= 400"""        
+        self.keycloak._send_request = Mock(side_effect=HTTPError)
+        result = self.keycloak.well_known(raise_exception=False)
         self.assertDictEqual({}, result)
 
         with self.assertRaises(HTTPError):
-            keycloak.well_known()
+            self.keycloak.well_known()
 
     def test_keycloak_connect_introspect(self):
         """Test keycloak endpoint introspect when status >= 400"""
-        keycloak = KeycloakConnect(
-            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-            settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'],
-            settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'],
-        )
-        keycloak._send_request = Mock(side_effect=HTTPError)
-        result = keycloak.introspect('', raise_exception=False)
+        self.keycloak._send_request = Mock(side_effect=HTTPError)
+        result = self.keycloak.introspect('', raise_exception=False)
         self.assertDictEqual({}, result)
 
         with self.assertRaises(HTTPError):
-            keycloak.introspect('')
+            self.keycloak.introspect('')
 
 
 class KeycloakRolesDecoratorTestCase(TestCase):
 
     def setUp(self):
-        self.uri = '/core/refinance_loan'
+        self.uri = '/loans'
         self.client = Client()
         self.factory = RequestFactory()
+        self.fake_userinfo = {
+            'sub': 'sid-test', 
+            'email_verified': False, 
+            'preferred_username': 'test'
+        }
 
     def tearDown(self):
         settings.KEYCLOAK_EXEMPT_URIS = []
         settings.KEYCLOAK_CONFIG['KEYCLOAK_SERVER_URL'] = 'http://localhost:8080/auth'
-        settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'] = 'REALM'
+        settings.KEYCLOAK_CONFIG['KEYCLOAK_REALM'] = 'TEST'
         settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_ID'] = 'client-backend'
         settings.KEYCLOAK_CONFIG['KEYCLOAK_CLIENT_SECRET_KEY'] = '41ab4e22-a6f3-4bef-86e3-f2a1c97d6387'
-        
+
     def test_when_token_is_active_and_has_roles_request_not_authorizated(self):
+        
         # GIVEN token as valid
         KeycloakConnect.is_token_active = Mock(return_value=True)
 
-        # GIVEN token has different role
-        KeycloakConnect.roles_from_token = Mock(return_value=['xxxxxx'])
+        # GIVEN token has no roles
+        KeycloakConnect.roles_from_token = Mock(return_value=None)
 
-        # GIVEN a Function endpoint has 'director'  role on GET method
-        @keycloak_roles({'GET': ['director']})
-        def api_func(request):
-            pass
+        # GIVEN userinfo from fake token
+        KeycloakConnect.userinfo = Mock(return_value=self.fake_userinfo)
+
+        # GIVEN a View endpoint
+        view = views.loans
 
         # GIVEN a fake request
         request = self.factory.get(self.uri)
         request.META['HTTP_AUTHORIZATION'] = 'Bearer token_fake'
 
         # WHEN middleware is processed
-        response = api_func(request)
+        response = KeycloakMiddleware(Mock()).process_view(request, view, [], {})
 
-        # THEN does't allow endpoint authorization
-        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
-        
+        # THEN not allows endpoint to be accessed (401)
+        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_when_token_is_active_and_has_roles_request_authorizated(self):
+        
         # GIVEN token as valid
         KeycloakConnect.is_token_active = Mock(return_value=True)        
 
         # GIVEN token has roles
         KeycloakConnect.roles_from_token = Mock(return_value=['director'])
 
-        # GIVEN a Function endpoint has 'director'  role on GET method
-        @keycloak_roles({'GET': ['director']})
-        def api_func(request):
-            pass
+        # GIVEN userinfo from fake token
+        KeycloakConnect.userinfo = Mock(return_value=self.fake_userinfo)
+        
+        # GIVEN a View endpoint has existis 'diretor' role on GET method
+        view = views.loans
 
         # GIVEN a fake request
         request = self.factory.get(self.uri)
         request.META['HTTP_AUTHORIZATION'] = 'Bearer token_fake'
 
         # WHEN middleware is processed
-        response = api_func(request)
+        KeycloakMiddleware(Mock()).process_view(request, view, [], {})
 
-        # THEN allows endpoint and pass token roles to request View
+        # THEN allows endpoint and pass token roles and userinfo to request View
         self.assertEquals(['director'], request.roles)
