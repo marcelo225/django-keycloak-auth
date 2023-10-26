@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# The implicit primary key type to add to models within this app. 
+# You can use this to keep AutoField as the primary key type for third party applications.
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
 
@@ -55,10 +58,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # keycloak interceptor
-    'django-keycloak-auth.middleware.KeycloakMiddleware',
+    'django_keycloak_auth.middleware.KeycloakMiddleware',
 ]
 
-ROOT_URLCONF = 'django-keycloak-auth.urls'
+ROOT_URLCONF = 'django_keycloak_auth.urls'
 
 TEMPLATES = [
     {
@@ -76,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'django-keycloak-auth.wsgi.application'
+WSGI_APPLICATION = 'django_keycloak_auth.wsgi.application'
 
 
 # Database
@@ -147,7 +150,7 @@ STATIC_URL = '/static/'
 KEYCLOAK_EXEMPT_URIS = []
 KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
-    'KEYCLOAK_REALM': 'REALM',
+    'KEYCLOAK_REALM': 'TEST',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
-    'KEYCLOAK_CLIENT_SECRET_KEY': '41ab4e22-a6f3-4bef-86e3-f2a1c97d6387'
+    'KEYCLOAK_CLIENT_SECRET_KEY': 'E2n41fJgl9BPIS3nDk1DQQ7BIPf6PauH'
 }

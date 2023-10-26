@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django-keycloak-auth.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_keycloak_auth.settings')
 
 application = get_wsgi_application()

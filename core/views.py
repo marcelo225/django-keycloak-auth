@@ -1,9 +1,9 @@
 from rest_framework import viewsets, views
 from . import models, serializers
 from rest_framework import status
+from rest_framework.decorators import api_view
 from django.http.response import JsonResponse
-from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, NotAuthenticated
-
+from django_keycloak_auth.decorators import keycloak_roles
 
 class BankViewSet(viewsets.ModelViewSet):
     """
@@ -29,7 +29,11 @@ class BankViewSet(viewsets.ModelViewSet):
         See the following example bellow:
         """
         # list of token roles
-        print(request.roles)        
+        print(request.roles)
+        
+        # Optional: get userinfo (SUB attribute from JWT)
+        print(request.userinfo)
+        
         return super().list(self, request)
 
 
@@ -62,6 +66,15 @@ class JudgementView(views.APIView):
         See the following example bellow:
         """
         # list of token roles
-        print(request.roles)
-        return super().get(self, request) 
+        return JsonResponse({"message": request.roles})
 
+
+@keycloak_roles(['director', 'judge', 'employee'])
+@api_view(['GET'])
+def loans(request):
+    """
+    List loan endpoint
+    This endpoint has configured keycloak roles only GET method 
+    and only GET methods will be accepted in api_view.
+    """
+    return JsonResponse({"message": request.roles})
