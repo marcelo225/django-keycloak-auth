@@ -74,8 +74,9 @@ class KeycloakMiddleware:
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         
-        # for now there is no role assigned yet
+        # for now there is no role assigned yet and no userinfo defined
         request.roles = []
+        request.userinfo = []
 
         # Checks the URIs (paths) that doesn't needs authentication        
         if hasattr(settings, 'KEYCLOAK_EXEMPT_URIS'):

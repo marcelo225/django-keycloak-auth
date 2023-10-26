@@ -111,7 +111,7 @@ Lead Developer - Marcelo Vinicius
 ```python
 MIDDLEWARE = [
     #...
-    'django-keycloak-auth.middleware.KeycloakMiddleware',
+    'django_keycloak_auth.middleware.KeycloakMiddleware',
     #...
 ]
 
@@ -229,6 +229,9 @@ When you don't put **keycloak_roles** attribute in the Views that means all meth
 When if you use `api_view` decorator, you would write a very simple `@keycloak_roles` decorator like this:
 
 ```python
+from django_keycloak_auth.decorators import keycloak_roles
+...
+
 @keycloak_roles(['director', 'judge', 'employee'])
 @api_view(['GET'])
 def loans(request):
@@ -309,11 +312,12 @@ $ python3 -m venv env && source env/bin/activate
 # Install dependences for this library
 $ python -m pip install --upgrade -r requirements.txt
 
-# Generate a local distribution for django-keyclaok-auth
+# Generate a local distribution for django-keyclaok-auth 
+# Change the version of this library if necessary
 $ python setup.py sdist
 
 # Generate a local dist (verify version)
-$ pip install dist/django-keycloak-auth-X.X.X.tar.gz
+$ pip install dist/django-keycloak-auth-0.9.7.tar.gz
 
 # Create migrations, fixtures and run django server
 $ python manage.py makemigrations && \
