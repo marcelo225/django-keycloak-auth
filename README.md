@@ -317,7 +317,7 @@ $ python -m pip install --upgrade -r requirements.txt
 $ python setup.py sdist
 
 # Generate a local dist (verify version)
-$ pip install dist/django-keycloak-auth-0.9.7.tar.gz
+$ pip install dist/*
 
 # Create migrations, fixtures and run django server
 $ python manage.py makemigrations && \
