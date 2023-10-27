@@ -101,7 +101,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         response = self.client.get(self.uri)
 
         # THEN allows endpoint to be accessed
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_when_some_URI_is_permitted_on_authentication_without_keycloak_roles_attribute_on_view(self):
         # GIVEN i've got a URI without 'keycloak_roles' on the View
@@ -111,7 +111,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         response = self.client.get(uri_no_roles)
 
         # THEN allows endpoint to be accessed
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_when_some_URI_without_authorization_on_http_header(self):
         # GIVEN a View endpoint
@@ -122,7 +122,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         response = KeycloakMiddleware(Mock()).process_view(request, view, [], {})        
 
         # THEN not allows endpoint to be accessed (401)
-        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_when_token_not_active(self):
         # GIVEN token as not valid
@@ -139,7 +139,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         response = KeycloakMiddleware(Mock()).process_view(request, view, [], {})
 
         # THEN not allows endpoint to be accessed (401)
-        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_when_token_as_active_and_no_roles_request_not_authorizated(self):
         # GIVEN token as valid
@@ -159,7 +159,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         response = KeycloakMiddleware(Mock()).process_view(request, view, [], {})
 
         # THEN not allows endpoint to be accessed (401)
-        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_when_token_as_active_and_has_roles_request_not_authorizated(self):
         # GIVEN token as valid
@@ -180,7 +180,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         response = KeycloakMiddleware(Mock()).process_view(request, view, [], {})
 
         # THEN does't allow endpoint authorization
-        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_when_token_as_active_and_has_roles_request_authorizated(self):
         # GIVEN token as valid
@@ -201,7 +201,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         response = KeycloakMiddleware(Mock()).process_view(request, view, [], {})
 
         # THEN allows endpoint and pass token roles to request View
-        self.assertEquals(['director'], request.roles)
+        self.assertEqual(['director'], request.roles)
 
     def test_when_realm_roles_and_client_roles_are_present_both_are_returned(self):
         fake_token = {
@@ -221,7 +221,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         self.keycloak.userinfo = Mock(return_value=fake_token)
         roles = self.keycloak.roles_from_token(Mock())
 
-        self.assertEquals(['judge', 'director'], roles)
+        self.assertEqual(['judge', 'director'], roles)
 
     def test_when_only_realm_roles_are_present_realm_roles_are_returned(self):
         fake_token = {
@@ -235,7 +235,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         self.keycloak.userinfo = Mock(return_value=fake_token)
         roles = self.keycloak.roles_from_token(Mock())
 
-        self.assertEquals(['director'], roles)
+        self.assertEqual(['director'], roles)
 
     def test_when_only_client_roles_are_present_client_roles_are_returned(self):
         fake_token = {
@@ -251,7 +251,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         self.keycloak.userinfo = Mock(return_value=fake_token)
         roles = self.keycloak.roles_from_token(Mock())
 
-        self.assertEquals(['judge'], roles)
+        self.assertEqual(['judge'], roles)
 
     def test_when_no_role_is_present_none_is_returned(self):
         fake_token = {}
@@ -259,7 +259,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         self.keycloak.userinfo = Mock(return_value=fake_token)
         roles = self.keycloak.roles_from_token(Mock())
 
-        self.assertEquals(None, roles)
+        self.assertEqual(None, roles)
     
     def test_when_only_user_info_is_present_user_info_are_returned(self):
         fake_token = {
@@ -272,7 +272,7 @@ class KeycloakMiddlewareTestCase(TestCase):
         
         userinfo = self.keycloak.userinfo(Mock())
         
-        self.assertEquals(fake_token['sub'], userinfo['sub'])
+        self.assertEqual(fake_token['sub'], userinfo['sub'])
 
     def test_keycloak_connect_well_known(self):
         """Test keycloak endpoint well_known when status >= 400"""        
@@ -334,7 +334,7 @@ class KeycloakRolesDecoratorTestCase(TestCase):
         response = KeycloakMiddleware(Mock()).process_view(request, view, [], {})
 
         # THEN not allows endpoint to be accessed (401)
-        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_when_token_is_active_and_has_roles_request_authorizated(self):
         
@@ -358,4 +358,4 @@ class KeycloakRolesDecoratorTestCase(TestCase):
         KeycloakMiddleware(Mock()).process_view(request, view, [], {})
 
         # THEN allows endpoint and pass token roles and userinfo to request View
-        self.assertEquals(['director'], request.roles)
+        self.assertEqual(['director'], request.roles)
