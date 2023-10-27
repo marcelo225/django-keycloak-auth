@@ -25,9 +25,6 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: dist
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -44,4 +41,5 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
           TWINE_PYPI_URL: ${{ secrets.PYPI_URL }}
         run: |
-          twine upload --repository-url $TWINE_PYPI_URL -u $TWINE_USERNAME -p $TWINE_PASSWORD .
+          pwd
+          twine upload --repository-url $TWINE_PYPI_URL -u $TWINE_USERNAME -p $TWINE_PASSWORD ./dist/*
