@@ -98,10 +98,12 @@ class KeycloakMiddlewareTestCase(TestCase):
         settings.KEYCLOAK_EXEMPT_URIS = ['core/banks']
 
         # WHEN makes a request that has 'keycloak_roles' attribute on View
-        response = self.client.get(self.uri)
+        get_response = self.client.get(self.uri)
+        post_response = self.client.post(self.uri, {"name": "fake", "code": "test"})
 
         # THEN allows endpoint to be accessed
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(get_response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(post_response.status_code, status.HTTP_201_CREATED)
 
     def test_when_some_URI_is_permitted_on_authentication_without_keycloak_roles_attribute_on_view(self):
         # GIVEN i've got a URI without 'keycloak_roles' on the View

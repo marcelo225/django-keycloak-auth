@@ -14,7 +14,6 @@ class BankViewSet(viewsets.ModelViewSet):
     queryset = models.Bank.objects.all()    
     keycloak_roles = {
         'GET': ['director', 'judge', 'employee'],
-        'POST': ['director', 'judge', ],
         'UPDATE': ['director', 'judge', ],
         'DELETE': ['director', 'judge', ],
         'PATCH': ['director', 'judge', 'employee'],
