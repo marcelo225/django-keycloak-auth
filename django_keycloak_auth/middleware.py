@@ -82,7 +82,9 @@ class KeycloakMiddleware:
         if hasattr(settings, 'KEYCLOAK_EXEMPT_URIS'):
             path = request.path_info.lstrip('/')
             if any(re.match(m, path) for m in settings.KEYCLOAK_EXEMPT_URIS):
-                return None
+                # Checks to see if a request.method explicitly overwrites exemptions in SETTINGS
+                if hasattr(view_func.cls, "keycloak_roles") and request.method not in view_func.cls.keycloak_roles:
+                    return None
 
         # There's condictions for these view_func.cls:
         # 1) @api_view -> view_func.cls is WrappedAPIView (validates in 'keycloak_roles' in decorators.py) -> True
