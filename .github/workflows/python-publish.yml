@@ -34,4 +34,5 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
           TWINE_PYPI_URL: ${{ secrets.PYPI_URL }}
         run: |
+          pip install twine
           twine upload --repository-url $TWINE_PYPI_URL -u $TWINE_USERNAME -p $TWINE_PASSWORD dist/*
