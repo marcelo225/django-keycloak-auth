@@ -88,8 +88,11 @@ class KeycloakMiddleware:
 
         # There's condictions for these view_func.cls:
         # 1) @api_view -> view_func.cls is WrappedAPIView (validates in 'keycloak_roles' in decorators.py) -> True
-        # 2) When it is a APIView, ViewSet or ModelViewSet with 'keycloak_roles' attribute -> False        
-        is_api_view = True if str(view_func.cls.__qualname__) == "WrappedAPIView" else False
+        # 2) When it is a APIView, ViewSet or ModelViewSet with 'keycloak_roles' attribute -> False
+        try:
+            is_api_view = True if str(view_func.cls.__qualname__) == "WrappedAPIView" else False
+        except AttributeError:
+            is_api_view = False
 
         # Read if View has attribute 'keycloak_roles' (for APIView, ViewSet or ModelViewSet)
         # Whether View hasn't this attribute, it means all request method routes will be permitted.        
