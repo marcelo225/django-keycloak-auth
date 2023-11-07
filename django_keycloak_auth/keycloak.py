@@ -117,6 +117,7 @@ class KeycloakConnect:
                 raise
             return {}
         return response
+    
     def jwks(self, raise_exception=True):
         """Dictionary of the OpenID Connect certs in Keycloak.
 
@@ -137,6 +138,7 @@ class KeycloakConnect:
                 raise
             return {}
         return response
+
     def introspect(self, token, token_type_hint=None, raise_exception=True):
         """
         Introspection Request token
