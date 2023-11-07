@@ -271,6 +271,7 @@ class KeycloakConnect:
                 raise
             return {}
         return response
+
     def decode(self, token, raise_exception=True, options=None):
         """Decodes token.
 
