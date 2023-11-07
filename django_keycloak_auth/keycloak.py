@@ -224,7 +224,10 @@ class KeycloakConnect:
         Returns:
             list: List of roles.
         """
-        token_decoded = self.introspect(token, raise_exception)
+        if self.use_introspection:
+            token_decoded = self.introspect(token, raise_exception)
+        else:
+            token_decoded = self.decode(token)
 
         realm_access = token_decoded.get("realm_access", None)
         resource_access = token_decoded.get("resource_access", None)
