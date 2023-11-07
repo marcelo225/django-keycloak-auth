@@ -200,8 +200,17 @@ class KeycloakConnect:
         Returns:
             bollean: Token valid (True) or invalid (False)
         """
-        introspect_token = self.introspect(token, raise_exception)
-        is_active = introspect_token.get("active", None)
+
+        if self.use_introspection:
+            introspect_token = self.introspect(token, raise_exception)
+            is_active = introspect_token.get("active", None)
+        else:
+            try:
+                self.decode(token, options={"verify_exp": True})
+                is_active = True
+            except ExpiredSignatureError as e:
+                is_active = False
+
         return True if is_active else False
 
     def roles_from_token(self, token, raise_exception=True):
