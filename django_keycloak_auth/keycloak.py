@@ -77,6 +77,12 @@ class KeycloakConnect:
             + self.realm_name
             + "/protocol/openid-connect/userinfo"
         )
+        self.certs_endpoint = (
+            self.server_url
+            + "/realms/"
+            + self.realm_name
+            + "/protocol/openid-connect/certs"
+        )
 
     @staticmethod
     def _send_request(method, url, **kwargs):
