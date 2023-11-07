@@ -31,7 +31,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class KeycloakConnect:
-    def __init__(self, server_url, realm_name, client_id, client_secret_key=None):
+    def __init__(self, server_url, realm_name, client_id, use_introspection, client_secret_key=None, ):
         """Create Keycloak Instance.
 
         Args:
@@ -56,6 +56,7 @@ class KeycloakConnect:
         self.realm_name = realm_name
         self.client_id = client_id
         self.client_secret_key = client_secret_key
+        self.use_introspection = use_introspection
 
         # Keycloak useful Urls
         self.well_known_endpoint = (
