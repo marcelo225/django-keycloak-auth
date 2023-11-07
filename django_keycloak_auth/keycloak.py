@@ -271,3 +271,38 @@ class KeycloakConnect:
                 raise
             return {}
         return response
+    def decode(self, token, raise_exception=True, options=None):
+        """Decodes token.
+
+        Args:
+            token (str): The string value of the token.
+            raise_exception: Raise exception the token cannot be decoded.
+
+        Returns:
+            json: decoded token
+        """
+
+        jwks = self.jwks()
+        keys = jwks.get('keys', [])
+        
+        public_keys = {}
+        for jwk in keys:
+            kid = jwk['kid']
+            public_keys[kid] = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk))
+
+        kid = jwt.get_unverified_header(token).get('kid', '')
+        key = public_keys.get(kid, '')
+
+        try:
+            payload = jwt.decode(token, key=key, algorithms=['RS256'], audience=self.client_id)
+        except DecodeError as ex:
+            LOGGER.error(
+                "Error decoding token "
+                f"decode error {ex}"
+            )
+            if raise_exception:
+                raise
+            return {}
+
+        return payload
+
