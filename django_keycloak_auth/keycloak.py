@@ -17,9 +17,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
+import jwt
 import requests
 import logging
 
+from base64 import b64decode
+from cryptography.hazmat.primitives import serialization
+from jwt.exceptions import DecodeError, ExpiredSignatureError
 from requests import HTTPError
 
 LOGGER = logging.getLogger(__name__)
