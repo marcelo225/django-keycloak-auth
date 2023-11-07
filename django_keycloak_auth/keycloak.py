@@ -117,7 +117,26 @@ class KeycloakConnect:
                 raise
             return {}
         return response
+    def jwks(self, raise_exception=True):
+        """Dictionary of the OpenID Connect certs in Keycloak.
 
+        Args:
+            raise_exception: Raise exception if the request ended with a status >= 400.
+
+        Returns:
+            [type]: [Dictionary of keycloak certs]
+        """
+        try:
+            response = self._send_request("GET", self.certs_endpoint)
+        except HTTPError as ex:
+            LOGGER.error(
+                "Error obtaining dictionary of certs from endpoint: "
+                f"{self.certs_endpoint}, response error {ex}"
+            )
+            if raise_exception:
+                raise
+            return {}
+        return response
     def introspect(self, token, token_type_hint=None, raise_exception=True):
         """
         Introspection Request token
