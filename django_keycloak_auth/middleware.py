@@ -50,7 +50,14 @@ class KeycloakConfig:
             raise ValueError("The mandatory KEYCLOAK_CLIENT_ID configuration variables has not defined.")
 
         if config['KEYCLOAK_CLIENT_SECRET_KEY'] is None:
-            raise ValueError("The mandatory KEYCLOAK_CLIENT_SECRET_KEY configuration variables has not defined.")
+            raise ValueError("The mandatory KEYCLOAK_CLIENT_SECRET_KEY configuration variables has not defined.")  
+        
+        if config.get('USE_INTROSPECTION') is None:
+            self.use_introspection = True
+        elif not isinstance(config.get('USE_INTROSPECTION'), bool):
+            raise ValueError("The USE_INTROSPECTION configuration variable must be True or False.")
+        else:
+            self.use_introspection = config.get('USE_INTROSPECTION')
 
 
 class KeycloakMiddleware:
@@ -67,7 +74,8 @@ class KeycloakMiddleware:
         self.keycloak = KeycloakConnect(server_url=self.keycloak_config.server_url,
                                         realm_name=self.keycloak_config.realm,
                                         client_id=self.keycloak_config.client_id,
-                                        client_secret_key=self.keycloak_config.client_secret_key)
+                                        use_introspection=self.keycloak_config.use_introspection,
+                                        client_secret_key=self.keycloak_config.client_secret_key,)
 
     def __call__(self, request):
         return self.get_response(request)      
