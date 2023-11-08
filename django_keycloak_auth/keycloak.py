@@ -24,6 +24,7 @@ import logging
 
 from base64 import b64decode
 from cryptography.hazmat.primitives import serialization
+from django.core.cache import cache
 from jwt.exceptions import DecodeError, ExpiredSignatureError
 from requests import HTTPError
 
@@ -127,8 +128,12 @@ class KeycloakConnect:
         Returns:
             [type]: [Dictionary of keycloak keys]
         """
+        response = cache.get('jwks')
+
         try:
-            response = self._send_request("GET", self.jwks_endpoint)
+            if response is None:
+                response = self._send_request("GET", self.jwks_endpoint)
+                cache.set('jwks', response)
         except HTTPError as ex:
             LOGGER.error(
                 "Error obtaining dictionary of keys from endpoint: "
@@ -137,6 +142,7 @@ class KeycloakConnect:
             if raise_exception:
                 raise
             return {}
+
         return response
 
     def introspect(self, token, token_type_hint=None, raise_exception=True):
