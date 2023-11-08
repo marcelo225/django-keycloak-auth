@@ -275,16 +275,21 @@ class KeycloakConnect:
             return {}
         return response
 
-    def decode(self, token, raise_exception=True, options=None):
+    def decode(self, token, audience=None, options=None, raise_exception=True):
         """Decodes token.
 
         Args:
             token (str): The string value of the token.
+            audience (str | List[str] | None): The audience to validate
+            options (dict): The options for jwt.decode https://pyjwt.readthedocs.io/en/stable/api.html?highlight=options
             raise_exception: Raise exception the token cannot be decoded.
 
         Returns:
             json: decoded token
         """
+
+        if audience is None:
+            audience = self.client_id
 
         jwks = self.jwks()
         keys = jwks.get('keys', [])
@@ -299,7 +304,7 @@ class KeycloakConnect:
         key = public_keys.get(kid, '')
 
         try:
-            payload = jwt.decode(token, key=key, algorithms=['RS256'], audience=self.client_id, options=options)
+            payload = jwt.decode(token, key=key, algorithms=['RS256'], audience=audience, options=options)
         except DecodeError as ex:
             LOGGER.error(
                 "Error decoding token "
