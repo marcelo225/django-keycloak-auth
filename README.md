@@ -125,14 +125,14 @@ MIDDLEWARE = [
 # For example: ['core/banks', 'swagger']
 KEYCLOAK_EXEMPT_URIS = []
 
-# USE_INTROSPECTION is optional and True by default.  If False
+# LOCAL_DECODE is optional and False by default.  If True
 # tokens will be decoded locally.
 KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
     'KEYCLOAK_REALM': 'TEST',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
     'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-    'USE_INTROSPECTION': True
+    'LOCAL_DECODE': False
 }
 ```
 

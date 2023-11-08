@@ -32,7 +32,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class KeycloakConnect:
-    def __init__(self, server_url, realm_name, client_id, use_introspection=True, client_secret_key=None, ):
+    def __init__(self, server_url, realm_name, client_id, local_decode=False, client_secret_key=None, ):
         """Create Keycloak Instance.
 
         Args:
@@ -43,7 +43,7 @@ class KeycloakConnect:
             client_id (str): 
                 Client ID
             client_secret_key (str, optional): 
-                Client secret credencials.
+                Client secret credentials.
                 For each 'access type':
                     - bearer-only -> Optional
                     - public -> Mandatory
@@ -57,7 +57,7 @@ class KeycloakConnect:
         self.realm_name = realm_name
         self.client_id = client_id
         self.client_secret_key = client_secret_key
-        self.use_introspection = use_introspection
+        self.local_decode = local_decode
 
         # Keycloak useful Urls
         self.well_known_endpoint = (
@@ -204,18 +204,18 @@ class KeycloakConnect:
             raise_exception: Raise exception if the request ended with a status >= 400.
 
         Returns:
-            bollean: Token valid (True) or invalid (False)
+            boolean: Token valid (True) or invalid (False)
         """
 
-        if self.use_introspection:
-            introspect_token = self.introspect(token, raise_exception)
-            is_active = introspect_token.get("active", None)
-        else:
+        if self.local_decode:
             try:
                 self.decode(token, options={"verify_exp": True})
                 is_active = True
             except ExpiredSignatureError as e:
                 is_active = False
+        else:
+            introspect_token = self.introspect(token, raise_exception)
+            is_active = introspect_token.get("active", None)
 
         return True if is_active else False
 
@@ -230,10 +230,10 @@ class KeycloakConnect:
         Returns:
             list: List of roles.
         """
-        if self.use_introspection:
-            token_decoded = self.introspect(token, raise_exception)
-        else:
+        if self.local_decode:
             token_decoded = self.decode(token)
+        else:
+            token_decoded = self.introspect(token, raise_exception)
 
         realm_access = token_decoded.get("realm_access", None)
         resource_access = token_decoded.get("resource_access", None)
@@ -268,8 +268,11 @@ class KeycloakConnect:
         """
         headers = {"authorization": "Bearer " + token}
         try:
-            response = self._send_request(
-                "GET", self.userinfo_endpoint, headers=headers)
+            if self.local_decode:
+                response = self.decode(token)
+            else:
+                response = self._send_request(
+                    "GET", self.userinfo_endpoint, headers=headers)
         except HTTPError as ex:
             LOGGER.error(
                 "Error obtaining userinfo token from endpoint: "
