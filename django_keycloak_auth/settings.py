@@ -98,6 +98,8 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'django_keycloak_auth',
+        'TIMEOUT': 60,
+        'KEY_FUNCTION': 'django_keycloak_auth_'
     }
 }
 CACHE_MIDDLEWARE_KEY_PREFIX = 'django_keycloak_auth_'
