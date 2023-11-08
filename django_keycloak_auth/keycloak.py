@@ -32,7 +32,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class KeycloakConnect:
-    def __init__(self, server_url, realm_name, client_id, use_introspection, client_secret_key=None, ):
+    def __init__(self, server_url, realm_name, client_id, use_introspection=True, client_secret_key=None, ):
         """Create Keycloak Instance.
 
         Args:
@@ -47,7 +47,7 @@ class KeycloakConnect:
                 For each 'access type':
                     - bearer-only -> Optional
                     - public -> Mandatory
-                    - confidencial -> Mandatory
+                    - confidential -> Mandatory
         
         Returns:
             object: Keycloak object
