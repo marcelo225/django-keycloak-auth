@@ -77,7 +77,7 @@ class KeycloakConnect:
             + self.realm_name
             + "/protocol/openid-connect/userinfo"
         )
-        self.certs_endpoint = (
+        self.jwks_endpoint = (
             self.server_url
             + "/realms/"
             + self.realm_name
@@ -119,20 +119,20 @@ class KeycloakConnect:
         return response
     
     def jwks(self, raise_exception=True):
-        """Dictionary of the OpenID Connect certs in Keycloak.
+        """Dictionary of the OpenID Connect keys in Keycloak.
 
         Args:
             raise_exception: Raise exception if the request ended with a status >= 400.
 
         Returns:
-            [type]: [Dictionary of keycloak certs]
+            [type]: [Dictionary of keycloak keys]
         """
         try:
-            response = self._send_request("GET", self.certs_endpoint)
+            response = self._send_request("GET", self.jwks_endpoint)
         except HTTPError as ex:
             LOGGER.error(
-                "Error obtaining dictionary of certs from endpoint: "
-                f"{self.certs_endpoint}, response error {ex}"
+                "Error obtaining dictionary of keys from endpoint: "
+                f"{self.jwks_endpoint}, response error {ex}"
             )
             if raise_exception:
                 raise
