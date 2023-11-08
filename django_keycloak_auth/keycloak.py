@@ -291,14 +291,15 @@ class KeycloakConnect:
         
         public_keys = {}
         for jwk in keys:
-            kid = jwk['kid']
-            public_keys[kid] = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk))
+            kid = jwk.get('kid')
+            if kid:
+                public_keys[kid] = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk))
 
         kid = jwt.get_unverified_header(token).get('kid', '')
         key = public_keys.get(kid, '')
 
         try:
-            payload = jwt.decode(token, key=key, algorithms=['RS256'], audience=self.client_id)
+            payload = jwt.decode(token, key=key, algorithms=['RS256'], audience=self.client_id, options=options)
         except DecodeError as ex:
             LOGGER.error(
                 "Error decoding token "
