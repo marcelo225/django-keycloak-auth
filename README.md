@@ -66,22 +66,22 @@ If you have recognized my effort in this initiative, please buy me a coffee when
 
 ### Via Pypi Package:
 
-``` $ pip install django-keycloak-auth ```
+`$ pip install django-keycloak-auth`
 
 ### Manually
 
-``` $ python setup.py install ```
+`$ python setup.py install`
 
 ## Dependencies
 
-* [Python 3](https://www.python.org/)
-* [requests](https://requests.readthedocs.io/en/master/)
-* [Django](https://www.djangoproject.com/)
-* [Django Rest Framework](https://www.django-rest-framework.org/)
+- [Python 3](https://www.python.org/)
+- [requests](https://requests.readthedocs.io/en/master/)
+- [Django](https://www.djangoproject.com/)
+- [Django Rest Framework](https://www.django-rest-framework.org/)
 
 ## Test dependences
 
-* [unittest](https://docs.python.org/3/library/unittest.html)
+- [unittest](https://docs.python.org/3/library/unittest.html)
 
 ## How to contribute
 
@@ -104,6 +104,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Lead Developer - Marcelo Vinicius
 
+Co-authored-by:
+
+- [chmoder](https://github.com/chmoder)
+
 ## Usage
 
 1. In your application `settings.py` file, add following Middleware:
@@ -120,13 +124,16 @@ MIDDLEWARE = [
 # Exempt URIS
 # For example: ['core/banks', 'swagger']
 KEYCLOAK_EXEMPT_URIS = []
+
+# USE_INTROSPECTION is optional and True by default.  If False
+# tokens will be decoded locally.
 KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
     'KEYCLOAK_REALM': 'TEST',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
     'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    'USE_INTROSPECTION': True
 }
-
 ```
 
 ## How to apply on your Views
@@ -237,7 +244,7 @@ from django_keycloak_auth.decorators import keycloak_roles
 def loans(request):
     """
     List loan endpoint
-    This endpoint has configured keycloak roles only 
+    This endpoint has configured keycloak roles only
     especific GET method will be accepted in api_view.
     """
     return JsonResponse({"message": request.roles})
@@ -296,12 +303,12 @@ $ docker-compose up
 ```
 
 2. Open http://localhost:8080/ in your web browser
-3. Create the following steps: 
+3. Create the following steps:
+
    1. `realm`, `client` (as confidential) and your `client secret` according the [settings.py](/django-keycloak-auth/settings.py#L148) file
-   2. Client Roles: `director`, `judge`, `employee` 
+   2. Client Roles: `director`, `judge`, `employee`
    3. Create a new user account
    4. Vinculate Client Roles into above user account
-
 
 4. Run following command on another terminal:
 
@@ -312,7 +319,7 @@ $ python3 -m venv env && source env/bin/activate
 # Install dependences for this library
 $ python -m pip install --upgrade -r requirements.txt
 
-# Generate a local distribution for django-keyclaok-auth 
+# Generate a local distribution for django-keyclaok-auth
 # Change the version of this library if necessary
 $ python setup.py sdist
 
