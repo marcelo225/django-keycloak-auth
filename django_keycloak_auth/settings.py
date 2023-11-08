@@ -99,7 +99,7 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'django_keycloak_auth',
         'TIMEOUT': 60,
-        'KEY_FUNCTION': 'django_keycloak_auth_'
+        'KEY_PREFIX': 'django_keycloak_auth_'
     }
 }
 CACHE_MIDDLEWARE_KEY_PREFIX = 'django_keycloak_auth_'
@@ -164,6 +164,6 @@ KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
     'KEYCLOAK_REALM': 'TEST',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
-    'KEYCLOAK_CLIENT_SECRET_KEY': 'E2n41fJgl9BPIS3nDk1DQQ7BIPf6PauH'
-    'USE_INTROSPECTION': True
+    'KEYCLOAK_CLIENT_SECRET_KEY': 'E2n41fJgl9BPIS3nDk1DQQ7BIPf6PauH',
+    'USE_INTROSPECTION': True,
 }
