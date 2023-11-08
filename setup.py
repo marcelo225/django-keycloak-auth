@@ -15,6 +15,7 @@ setup(
     # installed or upgraded on the target machine
     install_requires=[
         "cryptography",
+        "PyJWT",
         "Django",
         "djangorestframework>=3.10.0",
         "requests>=2.24.0"
