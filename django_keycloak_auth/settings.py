@@ -92,6 +92,16 @@ DATABASES = {
     }
 }
 
+# Cache
+# https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-CACHES
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'django_keycloak_auth',
+    }
+}
+CACHE_MIDDLEWARE_KEY_PREFIX = 'django_keycloak_auth_'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
