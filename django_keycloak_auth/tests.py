@@ -292,6 +292,15 @@ class KeycloakMiddlewareTestCase(TestCase):
         with self.assertRaises(HTTPError):
             self.keycloak.introspect('')
 
+    def test_keycloak_connect_introspect(self):
+        """Test keycloak endpoint introspect when status >= 400"""
+        self.keycloak._send_request = Mock(side_effect=HTTPError)
+        result = self.keycloak.jwks(raise_exception=False)
+        self.assertDictEqual({}, result)
+
+        with self.assertRaises(HTTPError):
+            self.keycloak.introspect('')
+
 
 class KeycloakRolesDecoratorTestCase(TestCase):
 
