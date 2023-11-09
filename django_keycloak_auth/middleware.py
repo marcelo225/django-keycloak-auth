@@ -17,12 +17,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import re
 from .keycloak import KeycloakConnect
 from django.conf import settings
 from django.http.response import JsonResponse
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, NotAuthenticated
 
+LOGGER = logging.getLogger(__name__)
 
 class KeycloakConfig:
 
@@ -114,7 +116,18 @@ class KeycloakMiddleware:
         # Get access token from the http request header
         auth_header = request.META.get('HTTP_AUTHORIZATION').split()
         token = auth_header[1] if len(auth_header) == 2 else auth_header[0]
-        
+
+        # Checks if the token is able to be decoded
+        try:
+            if self.keycloak_config.local_decode:
+                self.keycloak.decode(token, options={'verify_signature': False})
+        except Exception as ex:
+            LOGGER.error(f'Error in django_keycloak_auth middleware: {ex}')
+            return JsonResponse(
+                {"detail": "Invalid or expired token. Verify your Keycloak configuration."}, 
+                status=AuthenticationFailed.status_code
+            )
+       
         # Checks token is active
         if not self.keycloak.is_token_active(token):
             return JsonResponse(
