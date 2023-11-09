@@ -209,7 +209,7 @@ class KeycloakConnect:
 
         if self.local_decode:
             try:
-                self.decode(token, options={"verify_exp": True})
+                self.decode(token, options={"verify_exp": True}, raise_exception=raise_exception)
                 is_active = True
             except ExpiredSignatureError as e:
                 is_active = False
@@ -231,7 +231,7 @@ class KeycloakConnect:
             list: List of roles.
         """
         if self.local_decode:
-            token_decoded = self.decode(token)
+            token_decoded = self.decode(token, raise_exception=raise_exception)
         else:
             token_decoded = self.introspect(token, raise_exception)
 
@@ -269,7 +269,7 @@ class KeycloakConnect:
         headers = {"authorization": "Bearer " + token}
         try:
             if self.local_decode:
-                response = self.decode(token)
+                response = self.decode(token, raise_exception=raise_exception)
             else:
                 response = self._send_request(
                     "GET", self.userinfo_endpoint, headers=headers)
@@ -282,16 +282,17 @@ class KeycloakConnect:
             if raise_exception:
                 raise
             return {}
+        
         return response
 
     def decode(self, token, audience=None, options=None, raise_exception=True):
         """Decodes token.
 
         Args:
-            token (str): The string value of the token.
+            token (str): The string value of the token
             audience (str | List[str] | None): The audience to validate
             options (dict): The options for jwt.decode https://pyjwt.readthedocs.io/en/stable/api.html?highlight=options
-            raise_exception: Raise exception the token cannot be decoded.
+            raise_exception: Raise exception the token cannot be decoded or validated
 
         Returns:
             json: decoded token
@@ -314,10 +315,9 @@ class KeycloakConnect:
 
         try:
             payload = jwt.decode(token, key=key, algorithms=['RS256'], audience=audience, options=options)
-        except DecodeError as ex:
+        except Exception as ex:
             LOGGER.error(
-                "Error decoding token "
-                f"decode error {ex}"
+                f"Error decoding token {ex}"
             )
             if raise_exception:
                 raise
