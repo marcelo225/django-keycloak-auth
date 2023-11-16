@@ -14,11 +14,11 @@ setup(
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
     install_requires=[
-        "cryptography",
-        "PyJWT",
+        "cryptography>=3.4.0",
         "Django",
         "djangorestframework>=3.10.0",
-        "requests>=2.24.0"
+        "requests>=2.24.0",
+        "PyJWT>=2.8.0",
     ],
 
     # metadata to display on PyPI
