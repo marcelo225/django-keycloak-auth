@@ -126,7 +126,8 @@ MIDDLEWARE = [
 KEYCLOAK_EXEMPT_URIS = []
 
 # LOCAL_DECODE is optional and False by default.  If True
-# tokens will be decoded locally.
+# tokens will be decoded locally.  Instead of on the keycloak
+# server using the introspection endpoint.
 KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
     'KEYCLOAK_REALM': 'TEST',
