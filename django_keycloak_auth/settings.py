@@ -146,7 +146,7 @@ STATIC_URL = '/static/'
 # Roles registered within the client to be used in the Views of any application.
 # Its use is to deal with very specific business rules for each method of a view.
 
-# KEYCLOAK_CACHE_TIMEOUT - time to expire cache for public keys (jwks_endpoint)
+# KEYCLOAK_CACHE_TIMEOUT - time to expire cache in seconds for public keys (jwks_endpoint)
 # LOCAL_DECODE -  decode tokens locally or use keycloak introspection endpoint
 
 # For example: ['core/banks', 'swagger']
