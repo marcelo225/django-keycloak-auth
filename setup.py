@@ -8,15 +8,17 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="django-keycloak-auth",
-    version="0.9.8",
+    version="0.9.9",
     packages=find_packages(),
 
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
     install_requires=[
+        "cryptography>=3.4.0",
         "Django",
         "djangorestframework>=3.10.0",
-        "requests>=2.24.0"
+        "requests>=2.24.0",
+        "PyJWT>=2.8.0",
     ],
 
     # metadata to display on PyPI

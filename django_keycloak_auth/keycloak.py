@@ -17,16 +17,22 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
+import jwt
 import requests
 import logging
 
+from base64 import b64decode
+from cryptography.hazmat.primitives import serialization
+from django.core.cache import cache
+from jwt.exceptions import DecodeError, ExpiredSignatureError
 from requests import HTTPError
 
 LOGGER = logging.getLogger(__name__)
 
 
 class KeycloakConnect:
-    def __init__(self, server_url, realm_name, client_id, client_secret_key=None):
+    def __init__(self, server_url, realm_name, client_id, local_decode=False, client_secret_key=None, ):
         """Create Keycloak Instance.
 
         Args:
@@ -37,11 +43,11 @@ class KeycloakConnect:
             client_id (str): 
                 Client ID
             client_secret_key (str, optional): 
-                Client secret credencials.
+                Client secret credentials.
                 For each 'access type':
                     - bearer-only -> Optional
                     - public -> Mandatory
-                    - confidencial -> Mandatory
+                    - confidential -> Mandatory
         
         Returns:
             object: Keycloak object
@@ -51,6 +57,7 @@ class KeycloakConnect:
         self.realm_name = realm_name
         self.client_id = client_id
         self.client_secret_key = client_secret_key
+        self.local_decode = local_decode
 
         # Keycloak useful Urls
         self.well_known_endpoint = (
@@ -70,6 +77,12 @@ class KeycloakConnect:
             + "/realms/"
             + self.realm_name
             + "/protocol/openid-connect/userinfo"
+        )
+        self.jwks_endpoint = (
+            self.server_url
+            + "/realms/"
+            + self.realm_name
+            + "/protocol/openid-connect/certs"
         )
 
     @staticmethod
@@ -104,6 +117,32 @@ class KeycloakConnect:
             if raise_exception:
                 raise
             return {}
+        return response
+    
+    def jwks(self, raise_exception=True):
+        """Dictionary of the OpenID Connect keys in Keycloak.
+
+        Args:
+            raise_exception: Raise exception if the request ended with a status >= 400.
+
+        Returns:
+            [type]: [Dictionary of keycloak keys]
+        """
+        response = cache.get('jwks')
+
+        try:
+            if response is None:
+                response = self._send_request("GET", self.jwks_endpoint)
+                cache.set('jwks', response)
+        except HTTPError as ex:
+            LOGGER.error(
+                "Error obtaining dictionary of keys from endpoint: "
+                f"{self.jwks_endpoint}, response error {ex}"
+            )
+            if raise_exception:
+                raise
+            return {}
+
         return response
 
     def introspect(self, token, token_type_hint=None, raise_exception=True):
@@ -165,10 +204,19 @@ class KeycloakConnect:
             raise_exception: Raise exception if the request ended with a status >= 400.
 
         Returns:
-            bollean: Token valid (True) or invalid (False)
+            boolean: Token valid (True) or invalid (False)
         """
-        introspect_token = self.introspect(token, raise_exception)
-        is_active = introspect_token.get("active", None)
+
+        if self.local_decode:
+            try:
+                self.decode(token, options={"verify_exp": True}, raise_exception=raise_exception)
+                is_active = True
+            except ExpiredSignatureError as e:
+                is_active = False
+        else:
+            introspect_token = self.introspect(token, raise_exception)
+            is_active = introspect_token.get("active", None)
+
         return True if is_active else False
 
     def roles_from_token(self, token, raise_exception=True):
@@ -182,7 +230,10 @@ class KeycloakConnect:
         Returns:
             list: List of roles.
         """
-        token_decoded = self.introspect(token, raise_exception)
+        if self.local_decode:
+            token_decoded = self.decode(token, raise_exception=raise_exception)
+        else:
+            token_decoded = self.introspect(token, raise_exception)
 
         realm_access = token_decoded.get("realm_access", None)
         resource_access = token_decoded.get("resource_access", None)
@@ -217,8 +268,11 @@ class KeycloakConnect:
         """
         headers = {"authorization": "Bearer " + token}
         try:
-            response = self._send_request(
-                "GET", self.userinfo_endpoint, headers=headers)
+            if self.local_decode:
+                response = self.decode(token, raise_exception=raise_exception)
+            else:
+                response = self._send_request(
+                    "GET", self.userinfo_endpoint, headers=headers)
         except HTTPError as ex:
             LOGGER.error(
                 "Error obtaining userinfo token from endpoint: "
@@ -228,4 +282,46 @@ class KeycloakConnect:
             if raise_exception:
                 raise
             return {}
+        
         return response
+
+    def decode(self, token, audience=None, options=None, raise_exception=True):
+        """Decodes token.
+
+        Args:
+            token (str): The string value of the token
+            audience (str | List[str] | None): The audience to validate
+            options (dict): The options for jwt.decode https://pyjwt.readthedocs.io/en/stable/api.html?highlight=options
+            raise_exception: Raise exception the token cannot be decoded or validated
+
+        Returns:
+            json: decoded token
+        """
+
+        if audience is None:
+            audience = self.client_id
+
+        jwks = self.jwks()
+        keys = jwks.get('keys', [])
+        
+        public_keys = {}
+        for jwk in keys:
+            kid = jwk.get('kid')
+            if kid:
+                public_keys[kid] = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk))
+
+        kid = jwt.get_unverified_header(token).get('kid', '')
+        key = public_keys.get(kid, '')
+
+        try:
+            payload = jwt.decode(token, key=key, algorithms=['RS256'], audience=audience, options=options)
+        except Exception as ex:
+            LOGGER.error(
+                f"Error decoding token {ex}"
+            )
+            if raise_exception:
+                raise
+            return {}
+
+        return payload
+

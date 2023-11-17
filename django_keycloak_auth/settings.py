@@ -146,11 +146,29 @@ STATIC_URL = '/static/'
 # Roles registered within the client to be used in the Views of any application.
 # Its use is to deal with very specific business rules for each method of a view.
 
+# KEYCLOAK_CACHE_TIMEOUT - time to expire cache in seconds for public keys (jwks_endpoint)
+# LOCAL_DECODE -  decode tokens locally or use keycloak introspection endpoint
+
 # For example: ['core/banks', 'swagger']
 KEYCLOAK_EXEMPT_URIS = []
 KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
     'KEYCLOAK_REALM': 'TEST',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
-    'KEYCLOAK_CLIENT_SECRET_KEY': 'E2n41fJgl9BPIS3nDk1DQQ7BIPf6PauH'
+    'KEYCLOAK_CLIENT_SECRET_KEY': 'E2n41fJgl9BPIS3nDk1DQQ7BIPf6PauH',
+    'KEYCLOAK_CACHE_TTL': 60,
+    'LOCAL_DECODE': False,
 }
+
+
+# Cache
+# https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-CACHES
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'django_keycloak_auth',
+        'TIMEOUT': KEYCLOAK_CONFIG['KEYCLOAK_CACHE_TTL'],
+        'KEY_PREFIX': 'django_keycloak_auth_'
+    }
+}
+CACHE_MIDDLEWARE_KEY_PREFIX = 'django_keycloak_auth_'
