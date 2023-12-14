@@ -298,8 +298,8 @@ class KeycloakConnect:
             json: decoded token
         """
 
-        if audience is None:
-            audience = self.client_id
+        if audience is None:            
+            audience = 'account'
 
         jwks = self.jwks()
         keys = jwks.get('keys', [])

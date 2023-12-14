@@ -41,6 +41,6 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
           TWINE_PYPI_URL: ${{ secrets.PYPI_URL }}
         run: |
-          python setup.py sdist          
-          ls .
+          cp qr_code.png sdist
+          python setup.py sdist
           twine upload --repository-url $TWINE_PYPI_URL -u $TWINE_USERNAME -p $TWINE_PASSWORD dist/*

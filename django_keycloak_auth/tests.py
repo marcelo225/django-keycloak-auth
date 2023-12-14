@@ -1,10 +1,11 @@
-from django.test import TestCase, Client, RequestFactory
+from django.test import TestCase, Client, RequestFactory, override_settings
 from requests import HTTPError
 from rest_framework import status
 from django.conf import settings
 from .middleware import KeycloakMiddleware, KeycloakConnect
 from core import views
 from unittest.mock import Mock
+from django.conf import settings
 
 
 class KeycloakConfigTestCase(TestCase):
@@ -346,8 +347,11 @@ class KeycloakRolesDecoratorTestCase(TestCase):
 
         # THEN not allows endpoint to be accessed (401)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
+        
     def test_when_token_is_active_and_has_roles_request_authorizated(self):
+
+        # GIVEN LOCAL_DECODE as False in settings.py
+        settings.KEYCLOAK_CONFIG['LOCAL_DECODE'] = False
         
         # GIVEN token as valid
         KeycloakConnect.is_token_active = Mock(return_value=True)        
@@ -370,3 +374,30 @@ class KeycloakRolesDecoratorTestCase(TestCase):
 
         # THEN allows endpoint and pass token roles and userinfo to request View
         self.assertEqual(['director'], request.roles)
+
+    def test_when_cached_token_is_active_and_has_roles_request_authorizated(self):
+
+        # GIVEN LOCAL_DECODE as True in settings.py
+        settings.KEYCLOAK_CONFIG['LOCAL_DECODE'] = True
+        
+        # GIVEN token as valid
+        KeycloakConnect.is_token_active = Mock(return_value=True)        
+
+        # GIVEN token has roles
+        KeycloakConnect.roles_from_token = Mock(return_value=['director'])
+
+        # GIVEN userinfo from fake token
+        KeycloakConnect.userinfo = Mock(return_value=self.fake_userinfo)
+        
+        # GIVEN a View endpoint has existis 'diretor' role on GET method
+        view = views.loans
+
+        # GIVEN a fake request
+        request = self.factory.get(self.uri)
+        request.META['HTTP_AUTHORIZATION'] = 'Bearer token_fake'
+
+        # WHEN middleware is processed
+        KeycloakMiddleware(Mock()).process_view(request, view, [], {})
+
+        # THEN allows endpoint and pass token roles and userinfo to request View
+        self.assertEqual([], request.roles)

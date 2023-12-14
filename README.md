@@ -123,6 +123,7 @@ MIDDLEWARE = [
 
 # Exempt URIS
 # For example: ['core/banks', 'swagger']
+# This variable only works with Django Rest Framework Views, but not for native Django views.
 KEYCLOAK_EXEMPT_URIS = []
 
 # LOCAL_DECODE: is optional and False by default.  If True
@@ -137,7 +138,7 @@ KEYCLOAK_CONFIG = {
     'KEYCLOAK_CLIENT_ID': 'client-backend',
     'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
     'KEYCLOAK_CACHE_TTL': 60,
-    'LOCAL_DECODE': False
+    'LOCAL_DECODE': True
 }
 ```
 
