@@ -138,7 +138,7 @@ KEYCLOAK_CONFIG = {
     'KEYCLOAK_CLIENT_ID': 'client-backend',
     'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
     'KEYCLOAK_CACHE_TTL': 60,
-    'LOCAL_DECODE': True
+    'LOCAL_DECODE': False
 }
 ```
 
