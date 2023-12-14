@@ -1,4 +1,4 @@
-from django.test import TestCase, Client, RequestFactory, override_settings
+from django.test import TestCase, Client, RequestFactory
 from requests import HTTPError
 from rest_framework import status
 from django.conf import settings
