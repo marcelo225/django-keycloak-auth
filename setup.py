@@ -8,7 +8,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="django-keycloak-auth",
-    version="0.9.9",
+    version="1.0.0",
     packages=find_packages(),
 
     # Project uses reStructuredText, so ensure that the docutils get
