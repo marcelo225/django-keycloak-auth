@@ -17,22 +17,20 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import json
 import jwt
 import requests
-import logging
 
-from base64 import b64decode
-from cryptography.hazmat.primitives import serialization
 from django.core.cache import cache
-from jwt.exceptions import DecodeError, ExpiredSignatureError
+from jwt.exceptions import ExpiredSignatureError
 from requests import HTTPError
 
 LOGGER = logging.getLogger(__name__)
 
 
 class KeycloakConnect:
-    def __init__(self, server_url, realm_name, client_id, local_decode=False, client_secret_key=None, ):
+    def __init__(self, server_url, realm_name, client_id, local_decode=False, client_secret_key=None, audience=None):
         """Create Keycloak Instance.
 
         Args:
@@ -58,23 +56,25 @@ class KeycloakConnect:
         self.client_id = client_id
         self.client_secret_key = client_secret_key
         self.local_decode = local_decode
+        self.audience = audience
 
         # Keycloak useful Urls
+        realms = "/realms/"
         self.well_known_endpoint = (
             self.server_url
-            + "/realms/"
+            + realms
             + self.realm_name
             + "/.well-known/openid-configuration"
         )
         self.token_introspection_endpoint = (
             self.server_url
-            + "/realms/"
+            + realms
             + self.realm_name
             + "/protocol/openid-connect/token/introspect"
         )
         self.userinfo_endpoint = (
             self.server_url
-            + "/realms/"
+            + realms
             + self.realm_name
             + "/protocol/openid-connect/userinfo"
         )
@@ -211,7 +211,7 @@ class KeycloakConnect:
             try:
                 self.decode(token, options={"verify_exp": True}, raise_exception=raise_exception)
                 is_active = True
-            except ExpiredSignatureError as e:
+            except ExpiredSignatureError:
                 is_active = False
         else:
             introspect_token = self.introspect(token, raise_exception)
@@ -219,21 +219,17 @@ class KeycloakConnect:
 
         return True if is_active else False
 
-    def roles_from_token(self, token, raise_exception=True):
+    def roles_from_token(self, token_decoded):
         """
         Get roles from token
 
         Args:
-            token (string): The string value of the token.
+            token_decoded (dict): Dict with payload from token
             raise_exception: Raise exception if the request ended with a status >= 400.
 
         Returns:
             list: List of roles.
         """
-        if self.local_decode:
-            token_decoded = self.decode(token, raise_exception=raise_exception)
-        else:
-            token_decoded = self.introspect(token, raise_exception)
 
         realm_access = token_decoded.get("realm_access", None)
         resource_access = token_decoded.get("resource_access", None)
@@ -299,11 +295,14 @@ class KeycloakConnect:
         """
 
         if audience is None:
-            audience = self.client_id
+            if options:
+                options['verify_aud'] = False
+            else:
+                options = {'verify_aud': False}
 
         jwks = self.jwks()
         keys = jwks.get('keys', [])
-        
+
         public_keys = {}
         for jwk in keys:
             kid = jwk.get('kid')
@@ -314,14 +313,12 @@ class KeycloakConnect:
         key = public_keys.get(kid, '')
 
         try:
-            payload = jwt.decode(token, key=key, algorithms=['RS256'], audience=audience, options=options)
+            payload = jwt.decode(token, key=key, algorithms=['RS256'],
+                                 audience=audience, options=options)
         except Exception as ex:
-            LOGGER.error(
-                f"Error decoding token {ex}"
-            )
+            LOGGER.error(f"Error decoding token {ex}")
             if raise_exception:
                 raise
             return {}
 
         return payload
-

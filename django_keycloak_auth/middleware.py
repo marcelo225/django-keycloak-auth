@@ -38,8 +38,8 @@ class KeycloakConfig:
             self.server_url = config['KEYCLOAK_SERVER_URL']
             self.realm = config['KEYCLOAK_REALM']
             self.client_id = config['KEYCLOAK_CLIENT_ID']
-            self.client_secret_key = config['KEYCLOAK_CLIENT_SECRET_KEY']            
-        except KeyError as e:
+            self.client_secret_key = config['KEYCLOAK_CLIENT_SECRET_KEY']
+        except KeyError:
             raise ValueError("The mandatory KEYCLOAK configuration variables has not defined.")
 
         if config['KEYCLOAK_SERVER_URL'] is None:
@@ -60,6 +60,8 @@ class KeycloakConfig:
             raise ValueError("The LOCAL_DECODE configuration variable must be True or False.")
         else:
             self.local_decode = config.get('LOCAL_DECODE')
+        
+        self.audience = config.get('KEYCLOAK_AUDIENCE')
 
 
 class KeycloakMiddleware:
@@ -77,25 +79,19 @@ class KeycloakMiddleware:
                                         realm_name=self.keycloak_config.realm,
                                         client_id=self.keycloak_config.client_id,
                                         local_decode=self.keycloak_config.local_decode,
-                                        client_secret_key=self.keycloak_config.client_secret_key)
+                                        client_secret_key=self.keycloak_config.client_secret_key,
+                                        audience=self.keycloak_config.audience)
 
     def __call__(self, request):
         return self.get_response(request)      
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        
+
         # for now there is no role assigned yet and no userinfo defined
         request.roles = []
         request.userinfo = []
-
-        # Checks the URIs (paths) that doesn't needs authentication        
-        if hasattr(settings, 'KEYCLOAK_EXEMPT_URIS'):
-            path = request.path_info.lstrip('/')
-            if any(re.match(m, path) for m in settings.KEYCLOAK_EXEMPT_URIS):
-                # Checks to see if a request.method explicitly overwrites exemptions in SETTINGS
-                if hasattr(view_func.cls, "keycloak_roles") and request.method not in view_func.cls.keycloak_roles:
-                    return None
-
+        if not self.check_uris_path(request, view_func):
+            return None
         # There's condictions for these view_func.cls:
         # 1) @api_view -> view_func.cls is WrappedAPIView (validates in 'keycloak_roles' in decorators.py) -> True
         # 2) When it is a APIView, ViewSet or ModelViewSet with 'keycloak_roles' attribute -> False
@@ -108,52 +104,64 @@ class KeycloakMiddleware:
         # Whether View hasn't this attribute, it means all request method routes will be permitted.        
         try:
             view_roles = view_func.cls.keycloak_roles if not is_api_view else None
-        except AttributeError as e:
+        except AttributeError:
             return None
-        
-        # Checks if exists an authentication in the http request header        
+
+        # Checks if exists an authentication in the http request header
         if 'HTTP_AUTHORIZATION' not in request.META:
-            return JsonResponse({"detail": NotAuthenticated.default_detail}, status=NotAuthenticated.status_code)
-        
-        # Select actual role from 'keycloak_roles' according http request method (GET, POST, PUT or DELETE)
+            return JsonResponse(
+                {"detail": NotAuthenticated.default_detail},
+                status=NotAuthenticated.status_code
+            )
+
+        # Select actual role from 'keycloak_roles' according http request method
         require_role = view_roles.get(request.method, [None]) if not is_api_view else [None]
-        
+
         # Get access token from the http request header
         auth_header = request.META.get('HTTP_AUTHORIZATION').split()
         token = auth_header[1] if len(auth_header) == 2 else auth_header[0]
 
-        # Checks if the token is able to be decoded
         try:
-            if self.keycloak_config.local_decode:
-                self.keycloak.decode(token, options={'verify_signature': False})
-        except Exception as ex:
-            LOGGER.error(f'Error in django_keycloak_auth middleware: {ex}')
-            return JsonResponse(
-                {"detail": "Invalid or expired token. Verify your Keycloak configuration."}, 
-                status=AuthenticationFailed.status_code
-            )
-       
-        # Checks token is active
-        if not self.keycloak.is_token_active(token):
+            token_payload = self.get_payload(token, self.keycloak_config.local_decode)
+        except Exception:
             return JsonResponse(
                 {"detail": "Invalid or expired token. Verify your Keycloak configuration."}, 
                 status=AuthenticationFailed.status_code
             )
 
-        # Get roles from access token
-        token_roles = self.keycloak.roles_from_token(token)
+        token_roles = self.keycloak.roles_from_token(token_payload)
         if token_roles is None:
             return JsonResponse(
                 {'detail': 'This token has no client_id roles and no realm roles or client_id is not configured correctly.'},
                 status=AuthenticationFailed.status_code
             )
 
-        # Check exists any Token Role contains in View Role for only APIView, ViewSet or ModelViewSet
         if not is_api_view and (len(set(token_roles) & set(require_role)) == 0):
-            return JsonResponse({'detail': PermissionDenied.default_detail}, status=PermissionDenied.status_code)
-        
-        # Add to View request param list of roles from authenticated token
-        request.roles = token_roles
+            return JsonResponse(
+                {'detail': PermissionDenied.default_detail},
+                status=PermissionDenied.status_code
+            )
 
-        # Add to userinfo to the view
-        request.userinfo = self.keycloak.userinfo(token)
+        request.roles = token_roles
+        request.userinfo = token_payload
+
+    def check_uris_path(self, request, view_func):
+        """Checks the URIs (paths) that doesn't needs authentication"""
+        if hasattr(settings, 'KEYCLOAK_EXEMPT_URIS'):
+            path = request.path_info.lstrip('/')
+            if any(re.match(m, path) for m in settings.KEYCLOAK_EXEMPT_URIS):
+                request_method = request.method not in view_func.cls.keycloak_roles
+                if hasattr(view_func.cls, "keycloak_roles") and request_method:
+                    return False
+        return True
+
+    def get_payload(self, token, local_decode):
+        '''Получение payload из токена'''
+        if local_decode:
+            payload_token = self.keycloak.decode(
+                token,
+                options={'verify_signature': True,"verify_exp": True}
+            )
+        else:
+            payload_token = self.keycloak.introspect(token)
+        return payload_token
