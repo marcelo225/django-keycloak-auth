@@ -132,7 +132,7 @@ KEYCLOAK_EXEMPT_URIS = []
 # KEYCLOAK_CACHE_TTL: number of seconds to cache keyclaok public
 # keys
 KEYCLOAK_CONFIG = {
-    'KEYCLOAK_SERVER_URL': 'http://localhost:8080/auth',
+    'KEYCLOAK_SERVER_URL': 'http://localhost:8080',
     'KEYCLOAK_REALM': 'TEST',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
     'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
@@ -173,7 +173,7 @@ class BankViewSet(viewsets.ModelViewSet):
     def list(self, request):
         """
         Overwrite method
-        You can especify your rules inside each method
+        You can specify your rules inside each method
         using the variable 'request.roles' that means a
         list of roles that came from authenticated token.
         See the following example bellow:
@@ -219,7 +219,7 @@ class JudgementView(views.APIView):
     def get(self, request, format=None):
         """
         Overwrite method
-        You can especify your rules inside each method
+        You can specify your rules inside each method
         using the variable 'request.roles' that means a
         list of roles that came from authenticated token.
         See the following example bellow:
@@ -265,7 +265,7 @@ Before everything, you must install VirtualEnv.
 # Install venv in root project folder
 $ python3 -m venv env && source env/bin/activate
 
-# Install dependences
+# Install dependencies
 $ pip install -r requirements.txt
 
 # Run tests
@@ -287,7 +287,7 @@ $ python3 -m venv env && source env/bin/activate
 # Update packages for development
 $ python -m pip install --upgrade -r requirements.txt
 
-# Generate distribuition -> it's on me for while ;)
+# Generate distribution -> it's on me for while ;)
 $ python setup.py sdist
 
 # Checks if the package has no errors
@@ -321,7 +321,7 @@ $ docker-compose up
 # Install venv in root project folder
 $ python3 -m venv env && source env/bin/activate
 
-# Install dependences for this library
+# Install dependencies for this library
 $ python -m pip install --upgrade -r requirements.txt
 
 # Generate a local distribution for django-keyclaok-auth
