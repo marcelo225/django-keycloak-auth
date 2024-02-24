@@ -135,7 +135,7 @@ KEYCLOAK_CONFIG = {
     'KEYCLOAK_SERVER_URL': 'http://localhost:8080',
     'KEYCLOAK_REALM': 'TEST',
     'KEYCLOAK_CLIENT_ID': 'client-backend',
-    'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+    'KEYCLOAK_CLIENT_SECRET_KEY': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     'KEYCLOAK_CACHE_TTL': 60,
     'LOCAL_DECODE': False
 }
